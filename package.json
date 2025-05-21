@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/mkrtc/MkrtcJS/issues"
   },
-  "homepage": "https://github.com/mkrtc/MkrtcJS#readme"
+  "homepage": "https://github.com/mkrtc/MkrtcJS#readme",
+  "devDependencies": {
+    "@types/node": "^22.15.21"
+  }
 }

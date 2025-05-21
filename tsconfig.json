@@ -17,8 +17,6 @@
   },
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "packages/core" },
-    { "path": "packages/decorators" },
-    { "path": "packages/cli" }
+    { "path": "packages/core/tsconfig.build.json" }
   ]
 }

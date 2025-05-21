@@ -4,9 +4,11 @@
   "description": "Core package for MkrtcJS — includes dependency injection, metadata handling, and base architecture utilities.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "clean": "rm -rf dist"
   },
   "keywords": [
@@ -25,8 +27,16 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js"
     }
   },
-  "dependencies": {}
+  "dependencies": {
+    "react": "^19.1.0",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.5",
+    "tsc-alias": "^1.8.16"
+  }
 }

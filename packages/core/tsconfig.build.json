@@ -1,0 +1,24 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "src",
+        "outDir": "dist",
+        "baseUrl": "src",
+        "paths": {
+            "@/common": ["common"],
+            "@/common/*": ["common/*"],
+            "@/decorators": ["decorators"],
+            "@/decorators/*": ["decorators/*"],
+            "@/hooks": ["hooks"],
+            "@/hooks/*": ["hooks/*"],
+            "@/di": ["di"],
+            "@/di/*": ["di/*"],
+            "@/types": ["types"],
+            "@/types/*": ["types/*"],
+            "@/utils": ["utils"],
+            "@/utils/*": ["utils/*"],
+        }
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"]
+}
