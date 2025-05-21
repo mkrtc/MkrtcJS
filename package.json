@@ -1,0 +1,19 @@
+{
+  "name": "mkrtcjs",
+  "private": true,
+  "version": "0.0.0",
+  "description": "A scalable React architecture framework with TypeScript, inspired by NestJS and Angular, packed as a pnpm monorepo. Provides decorators for DI, state management, and developer tooling for building maintainable frontend apps.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mkrtc/MkrtcJS.git"
+  },
+  "author": "Sarkis Mkrtchian <mkrtc.sarkis@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mkrtc/MkrtcJS/issues"
+  },
+  "homepage": "https://github.com/mkrtc/MkrtcJS#readme"
+}

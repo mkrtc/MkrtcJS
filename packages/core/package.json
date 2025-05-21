@@ -1,0 +1,32 @@
+{
+  "name": "@mkrtcjs/core",
+  "version": "0.1.0",
+  "description": "Core package for MkrtcJS — includes dependency injection, metadata handling, and base architecture utilities.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "typescript",
+    "react",
+    "architecture",
+    "nest-inspired",
+    "dependency-injection",
+    "decorators"
+  ],
+  "author": "mkrtc",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "dependencies": {}
+}
