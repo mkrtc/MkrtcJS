@@ -8,3 +8,4 @@ export * from "./timer";
 export * from "./use-cache";
 export * from "./catch";
 export * from "./watch";
+export * from "./on-destroy";

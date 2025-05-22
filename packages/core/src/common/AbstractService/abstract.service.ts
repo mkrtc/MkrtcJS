@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import type { DecoratorMetadata } from "@/types";
-import { STATE_META_KEY, USE_EFFECT_META_KEY, WATCH_META_KEY } from "../constants";
+import { ON_DESTROY_KEY, STATE_META_KEY, USE_EFFECT_META_KEY, WATCH_META_KEY } from "../constants";
 import { IState } from "@/decorators";
 
 type Listener = () => void;
@@ -29,6 +29,13 @@ export abstract class AbstractService<T extends object = Record<string, any>> {
 
     public get state(): T {
         return this._state;
+    }
+
+    public destroy(){
+        const methods: DecoratorMetadata<Function>[] = Reflect.getMetadata(ON_DESTROY_KEY, this) ?? [];
+        for(const {value} of methods){
+            value.apply(this);
+        }
     }
 
     public setState<K extends keyof T>(key: K, value: T[K]) {

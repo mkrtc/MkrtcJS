@@ -1,8 +1,9 @@
 "use client"
 import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific } from "@/types";
 import { AbstractService } from "@/common";
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { getDepsFromOptions, initService } from "@/utils";
+import { ServiceDiContainer } from "@/di";
 
 
 export function useService<T extends AbstractService<any>>(
@@ -39,10 +40,20 @@ export function useService<T extends AbstractService<any>>(
     keys?: Array<keyof T['state']> | "*",
     options?: UseServiceOptions
 ): KUseServiceSpecific<T, keyof T['state']> | KUseServiceAll<T> | [T, UseField<T>] {
-    const service = useMemo(() => initService(ServiceClass, options), [ServiceClass, getDepsFromOptions(options)]);
+    const [service, diKey] = useMemo(() => initService(ServiceClass, options), [ServiceClass, getDepsFromOptions(options)]);
 
     const stateKeys: string[] = Object.keys(service.state);
     const selectedState = {service} as KUseServiceSpecific<T, keyof T['state']>;
+
+    useEffect(() => {
+        return () => {
+            if(!ServiceDiContainer.has(diKey)) return;
+            if("__isGlobal" in service && service.__isGlobal) return;
+            
+            service.destroy();
+            ServiceDiContainer.delete(diKey);
+        }
+    }, [])
     
     const useField = <V>(key: keyof T['state']): V => {
         if (typeof selectedState.service['state'][key] === "undefined") throw new Error(`Key ${key.toString()} not found in service ${ServiceClass.name}`);
