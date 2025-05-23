@@ -9,7 +9,12 @@ const serviceRefCount = new Map<string, number>();
 const serviceOwners = new Map<string, Set<string>>();
 
 export function useService<T extends AbstractService<any>>(
-    ServiceClass: new (...args: any[]) => T
+    ServiceClass: new (...args: any[]) => T,
+): [T, UseField<T>];
+
+export function useService<T extends AbstractService<any>>(
+    ServiceClass: new (...args: any[]) => T,
+    options?: UseServiceOptions 
 ): [T, UseField<T>];
 
 
@@ -39,15 +44,16 @@ export function useService<T extends AbstractService<any>>(
 
 export function useService<T extends AbstractService<any>>(
     ServiceClass: new (...args: any[]) => T,
-    keys?: Array<keyof T['state']> | "*",
+    keys?: Array<keyof T['state']> | "*" | UseServiceOptions,
     options?: UseServiceOptions
 ): KUseServiceSpecific<T, keyof T['state']> | KUseServiceAll<T> | [T, UseField<T>] {
     const instanceId = useRef(crypto.randomUUID()).current;
     const serviceRef = useRef<T>(null);
     const diKeyRef = useRef<string>(null);
+    const opts = (Array.isArray(keys) || typeof keys === "string") ? options : keys;
 
     if (!serviceRef.current) {
-        const [service, diKey] = initService(ServiceClass, options);
+        const [service, diKey] = initService(ServiceClass, opts);
         serviceRef.current = service;
         diKeyRef.current = diKey;
 
@@ -74,10 +80,12 @@ export function useService<T extends AbstractService<any>>(
 
         return () => {
             owners.delete(instanceId);
+
             if (owners.size === 0) {
-                service.destroy();
                 serviceRefCount.delete(diKey);
                 serviceOwners.delete(diKey);
+                if((service as any).__isGlobal) return;
+                service.destroy();
                 ServiceDiContainer.delete(diKey);
             } else {
                 serviceRefCount.set(diKey, owners.size);
@@ -97,7 +105,7 @@ export function useService<T extends AbstractService<any>>(
         );
     }
 
-    if (!keys && !options) return [service, useField];
+    if (!keys || (!Array.isArray(keys) && typeof keys !== "string")) return [service, useField];
 
     if (keys === "*") {
         for (const key of stateKeys) {
