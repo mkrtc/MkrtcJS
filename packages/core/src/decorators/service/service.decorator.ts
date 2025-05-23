@@ -2,22 +2,13 @@ import "reflect-metadata";
 import { AbstractService } from "@/common"
 import { initState, inject, onInit } from "@/utils";
 
-interface ServiceOptions{
-    isGlobal?: boolean;
-}
 
 
-interface IService{
-    __isGlobal: boolean;
-} 
-
-export const Service = (options?: ServiceOptions) => <T extends { new(...args: any[]): object }>(target: T) => {
-    const service = class extends target implements IService{
-        public __isGlobal: boolean;
+export const Service = () => <T extends { new(...args: any[]): object }>(target: T) => {
+    const service = class extends target{
         constructor(...args: any[]) {
             super(...args);
             if (!(this instanceof AbstractService)) throw new Error(`${target.name} is not instance of AbstractService`);
-            this.__isGlobal = options?.isGlobal || false;
             initState.call(this);
             inject.call(this);
             onInit.call(this);
