@@ -54,7 +54,7 @@ export function useService<T extends AbstractService<any>>(
 
     if (!serviceRef.current) {
         const [service, diKey] = initService(ServiceClass, opts);
-        serviceRef.current = service;
+        serviceRef.current = service;;
         diKeyRef.current = diKey;
 
         if (!serviceRefCount.has(diKey)) {
