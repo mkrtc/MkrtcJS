@@ -1,6 +1,6 @@
 import { IsNotServiceException, StateNotFoundException } from "exceptions";
-import { IService } from "../service";
 import type { IUseState, Mapper, Updater, UseStateOptions } from "./types";
+import type { IService } from "../service";
 
 const methodApply = <S extends object, I, A extends any[] = []>(mapper: Mapper<S, I, A>): MethodDecorator =>
     (target, propertyKey, descriptor: PropertyDescriptor) => {

@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import type { DecoratorMetadata } from "@/types";
-import type { IService } from "@/decorators";
+import type { IService } from "@/decorators/client";
 import { INJECT_META_KEY } from "@/common";
 
 

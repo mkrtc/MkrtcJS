@@ -1,7 +1,7 @@
-import { InjectableDiContainer } from "@/di";
+import { ClientDIContainer } from "@/di";
 
 export function Injectable(): ClassDecorator {
     return function (target: any) {
-        InjectableDiContainer.set(target, new target());
+        ClientDIContainer.get("injectable").set(target, new target());
     }
 }

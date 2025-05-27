@@ -1,15 +1,19 @@
-import { ServiceDiContainer } from "@/di";
+"use client"
 import type { UseServiceOptions } from "@/types";
-import { IService } from "@/decorators";
+import type { ClientDIContainer } from "@/di";
 import { IsNotServiceException } from "exceptions";
+import { IsNotClientServiceException } from "exceptions/is-not-client-service.exception";
+import { IService } from "client";
 
-export const initService = <C, S extends Record<string, any>>(ServiceClass: new (...args: any[]) => C, options?: UseServiceOptions): [IService<S>, string] => {
+export const initClientService = <C, S extends Record<string, any>>(container: typeof ClientDIContainer, ServiceClass: new (...args: any[]) => C, options?: UseServiceOptions): [IService<S>, string] => {
     let key: string = ServiceClass.name;
+    const serviceDiContainer = container.get("services");
+    console.log(serviceDiContainer);
     if (options) {
         if (options.scope) {
             let key = `${ServiceClass.name}#${options.scope}`;;
-            if (ServiceDiContainer.has(key)) {
-                const inst = ServiceDiContainer.get(key) as IService<S>;
+            if (serviceDiContainer.has(key)) {
+                const inst = serviceDiContainer.get(key) as IService<S>;
                 return [inst, key];
             }
             const inst = new ServiceClass() as IService<S>;
@@ -18,17 +22,18 @@ export const initService = <C, S extends Record<string, any>>(ServiceClass: new 
             if (typeof options.isGlobal !== "undefined") {
                 inst.__isGlobal = options.isGlobal;
             }
-            ServiceDiContainer.set(key, inst);
+            serviceDiContainer.set(key, inst);
             return [inst, key];
 
         }
     }
 
-    let inst = ServiceDiContainer.get(key) as IService<S>;
+    let inst = serviceDiContainer.get(key) as IService<S>;
     if (!inst) {
         inst = new ServiceClass() as IService<S>;
         if(!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
-        ServiceDiContainer.set(key, inst);
+        
+        serviceDiContainer.set(key, inst);
     }
     if (options && typeof options.isGlobal !== "undefined") {
         inst.__isGlobal = options.isGlobal;

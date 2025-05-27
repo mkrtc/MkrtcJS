@@ -1,0 +1,1 @@
+export * from "./MkrtcJS-root-provider.component";

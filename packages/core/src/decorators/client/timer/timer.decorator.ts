@@ -1,14 +1,8 @@
 import "reflect-metadata";
 import { STATE_META_KEY } from "@/common";
-import { DecoratorMetadata } from "@/types";
+import type { DecoratorMetadata, ITimer } from "@/types";
 import { IState } from "../use-state";
 import { IService } from "../service";
-
-export interface ITimer {
-    completed: boolean;
-    left: number;
-    ms: number;
-}
 
 interface TimerOptions {
     tickRate: number;

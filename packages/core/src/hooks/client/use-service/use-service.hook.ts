@@ -1,13 +1,10 @@
 "use client"
 import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific } from "@/types";
 import { useLayoutEffect, useRef, useSyncExternalStore } from "react";
-import { initService } from "@/utils";
-import { ServiceDiContainer } from "@/di";
-import { IService } from "@/decorators";
+import { initClientService } from "@/utils";
 import { StateNotFoundException } from "exceptions";
-
-const serviceRefCount = new Map<string, number>();
-const serviceOwners = new Map<string, Set<string>>();
+import { ClientDIContainer } from "@/di";
+import { IService } from "client";
 
 export function useService<C, S extends Record<string, any>>(
     ServiceClass: new (...args: any[]) => C,
@@ -52,9 +49,12 @@ export function useService<C, S extends Record<string, any>>(
     const serviceRef = useRef<IService<S>>(null);
     const diKeyRef = useRef<string>(null);
     const opts = (Array.isArray(keys) || typeof keys === "string") ? options : keys;
+    const serviceRefCount = ClientDIContainer.get("serviceRefCount");
+    const serviceOwners = ClientDIContainer.get("serviceOwners");
+    const serviceDiContainer = ClientDIContainer.get("services");
 
     if (!serviceRef.current) {
-        const [service, diKey] = initService<C, S>(ServiceClass, opts);
+        const [service, diKey] = initClientService<C, S>(ClientDIContainer, ServiceClass, opts);
         serviceRef.current = service;
         diKeyRef.current = diKey;
 
@@ -67,6 +67,7 @@ export function useService<C, S extends Record<string, any>>(
         }
     }
 
+    
     const diKey = diKeyRef.current!;
     const service = serviceRef.current!;
 
@@ -88,7 +89,7 @@ export function useService<C, S extends Record<string, any>>(
                 serviceOwners.delete(diKey);
                 if((service as any).__isGlobal) return;
                 service.__destroy();
-                ServiceDiContainer.delete(diKey);
+                serviceDiContainer.delete(diKey);
             } else {
                 serviceRefCount.set(diKey, owners.size);
             }
@@ -100,7 +101,6 @@ export function useService<C, S extends Record<string, any>>(
 
     const useField = <V>(key: keyof S): V => {
         const sv = selectedState.service as IService<S>;
-
         if (typeof sv.__state[key] === "undefined") throw new StateNotFoundException(ServiceClass.name, key.toString());
 
         return useSyncExternalStore<V>(

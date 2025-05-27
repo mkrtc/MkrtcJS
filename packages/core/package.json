@@ -29,9 +29,25 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js"
+    },
+    "./client": {
+      "import": "./dist/client/index.js",
+      "types": "./dist/client/index.d.ts",
+      "require": "./dist/client/index.js"
+    },
+    "./server": {
+      "import": "./dist/server/index.js",
+      "types": "./dist/server/index.d.ts",
+      "require": "./dist/server/index.js"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts",
+      "require": "./dist/types/index.js"
     }
   },
   "dependencies": {
+    "next": "^15.3.2",
     "react": "^19.1.0",
     "reflect-metadata": "^0.2.2"
   },

@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { ON_DESTROY_KEY, STATE_META_KEY, USE_EFFECT_META_KEY, WATCH_META_KEY } from "@/common"
 import { initState, inject, onInit } from "@/utils";
 import { DecoratorMetadata } from "@/types";
-import { IState } from "../use-state";
+import { IState } from "..";
 
 export interface IService<S extends Record<string, any> = Record<string, any>> {
     __isGlobal: boolean;
@@ -18,7 +18,7 @@ export interface IService<S extends Record<string, any> = Record<string, any>> {
 type Listener = () => void;
 
 interface ServiceOptions {
-    isGlobal: boolean;
+    isGlobal?: boolean;
 }
 
 export const Service = <S extends Record<string, any> = Record<string, any>>(options?: ServiceOptions) => <T extends { new(...args: any[]): object }>(target: T) => {
@@ -31,6 +31,7 @@ export const Service = <S extends Record<string, any> = Record<string, any>>(opt
         constructor(...args: any[]) {
             super(...args);
             this.__isGlobal = options?.isGlobal || false;
+
             initState.call(this);
             inject.call(this);
             onInit.call(this);
