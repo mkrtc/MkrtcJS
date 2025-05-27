@@ -1,7 +1,8 @@
 import "reflect-metadata";
-import { AbstractService, STATE_META_KEY } from "@/common";
+import { STATE_META_KEY } from "@/common";
 import { DecoratorMetadata } from "@/types";
 import { IState } from "../use-state";
+import { IService } from "../service";
 
 export interface ITimer {
     completed: boolean;
@@ -15,7 +16,7 @@ interface TimerOptions {
     onTick?: (timer: ITimer) => void;
 }
 
-let timerMap = new WeakMap<AbstractService<any>, Record<string, NodeJS.Timeout>>();
+let timerMap = new WeakMap<IService, Record<string, NodeJS.Timeout>>();
 
 /**
  * Run timer
@@ -61,7 +62,7 @@ export const Timer = <T extends object>(key: keyof T, options: TimerOptions): Me
 
 
     descriptor.value = function (...args: any[]) {
-        const self = this as AbstractService<any>;
+        const self = this as IService;
         const { ms, tickRate } = options;
 
         const timers = timerMap.get(self) ?? {};
@@ -71,7 +72,7 @@ export const Timer = <T extends object>(key: keyof T, options: TimerOptions): Me
 
         let ticks = 0;
 
-        self.setState(key, {
+        self.__setState(key.toString(), {
             completed: false,
             left: ms,
             ms
@@ -81,13 +82,13 @@ export const Timer = <T extends object>(key: keyof T, options: TimerOptions): Me
             ticks++;
             const left = Math.max(ms - ticks * tickRate, 0);
             
-            self.setState(key, {
+            self.__setState(key.toString(), {
                 completed: left <= 0,
                 left,
                 ms
             });
 
-            options.onTick?.(self.state[key]);
+            options.onTick?.(self.__state[key.toString()]);
 
             if (left <= 0) {
                 clearInterval(interval);

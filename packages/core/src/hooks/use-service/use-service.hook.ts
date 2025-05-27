@@ -1,60 +1,61 @@
 "use client"
 import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific } from "@/types";
-import { AbstractService } from "@/common";
 import { useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { initService } from "@/utils";
 import { ServiceDiContainer } from "@/di";
+import { IService } from "@/decorators";
+import { StateNotFoundException } from "exceptions";
 
 const serviceRefCount = new Map<string, number>();
 const serviceOwners = new Map<string, Set<string>>();
 
-export function useService<T extends AbstractService<any>>(
-    ServiceClass: new (...args: any[]) => T,
-): [T, UseField<T>];
+export function useService<C, S extends Record<string, any>>(
+    ServiceClass: new (...args: any[]) => C,
+): [C, UseField<S>];
 
-export function useService<T extends AbstractService<any>>(
-    ServiceClass: new (...args: any[]) => T,
+export function useService<C, S extends Record<string, any>>(
+    ServiceClass: new (...args: any[]) => C,
     options?: UseServiceOptions 
-): [T, UseField<T>];
+): [C, UseField<S>];
 
 
-export function useService<T extends AbstractService<any>>(
-    ServiceClass: new (...args: any[]) => T,
-    keys: Array<keyof T['state']>
-): KUseServiceSpecific<T, keyof T['state']>;
+export function useService<C, S extends Record<string, any>>(
+    ServiceClass: new (...args: any[]) => C,
+    keys: Array<keyof S>
+): KUseServiceSpecific<C, S, keyof S>;
 
-export function useService<T extends AbstractService<any>>(
-    ServiceClass: new (...args: any[]) => T,
+export function useService<C, S extends Record<string, any>>(
+    ServiceClass: new (...args: any[]) => C,
     keys: "*"
-): KUseServiceAll<T>;
+): KUseServiceAll<C, S>;
 
 
-export function useService<T extends AbstractService<any>>(
-    ServiceClass: new (...args: any[]) => T,
-    keys: Array<keyof T['state']>,
+export function useService<C, S extends Record<string, any>>(
+    ServiceClass: new (...args: any[]) => C,
+    keys: Array<keyof S>,
     options: UseServiceOptions
-): KUseServiceSpecific<T, keyof T['state']>;
+): KUseServiceSpecific<C, S, keyof S>;
 
-export function useService<T extends AbstractService<any>>(
-    ServiceClass: new (...args: any[]) => T,
+export function useService<C, S extends Record<string, any>>(
+    ServiceClass: new (...args: any[]) => C,
     keys: "*",
     options: UseServiceOptions
-): KUseServiceAll<T>;
+): KUseServiceAll<C, S>;
 
 
-export function useService<T extends AbstractService<any>>(
-    ServiceClass: new (...args: any[]) => T,
-    keys?: Array<keyof T['state']> | "*" | UseServiceOptions,
+export function useService<C, S extends Record<string, any>>(
+    ServiceClass: new (...args: any[]) => C,
+    keys?: Array<keyof S> | "*" | UseServiceOptions,
     options?: UseServiceOptions
-): KUseServiceSpecific<T, keyof T['state']> | KUseServiceAll<T> | [T, UseField<T>] {
+): KUseServiceSpecific<C, S, keyof S> | KUseServiceAll<C, S> | [C, UseField<S>] {
     const instanceId = useRef(crypto.randomUUID()).current;
-    const serviceRef = useRef<T>(null);
+    const serviceRef = useRef<IService<S>>(null);
     const diKeyRef = useRef<string>(null);
     const opts = (Array.isArray(keys) || typeof keys === "string") ? options : keys;
 
     if (!serviceRef.current) {
-        const [service, diKey] = initService(ServiceClass, opts);
-        serviceRef.current = service;;
+        const [service, diKey] = initService<C, S>(ServiceClass, opts);
+        serviceRef.current = service;
         diKeyRef.current = diKey;
 
         if (!serviceRefCount.has(diKey)) {
@@ -72,6 +73,7 @@ export function useService<T extends AbstractService<any>>(
     const owners = serviceOwners.get(diKey)!;
     owners.add(instanceId);
     serviceRefCount.set(diKey, owners.size);
+
     useLayoutEffect(() => {
         const diKey = diKeyRef.current!;
         const owners = serviceOwners.get(diKey)!;
@@ -85,7 +87,7 @@ export function useService<T extends AbstractService<any>>(
                 serviceRefCount.delete(diKey);
                 serviceOwners.delete(diKey);
                 if((service as any).__isGlobal) return;
-                service.destroy();
+                service.__destroy();
                 ServiceDiContainer.delete(diKey);
             } else {
                 serviceRefCount.set(diKey, owners.size);
@@ -93,19 +95,22 @@ export function useService<T extends AbstractService<any>>(
         };
     }, []);
 
-    const stateKeys: string[] = Object.keys(service.state);
-    const selectedState = { service } as KUseServiceSpecific<T, keyof T['state']>;
-    const useField = <V>(key: keyof T['state']): V => {
-        if (typeof selectedState.service['state'][key] === "undefined") throw new Error(`Key ${key.toString()} not found in service ${ServiceClass.name}`);
+    const stateKeys: string[] = Object.keys(service.__state);
+    const selectedState = { service } as KUseServiceSpecific<C, S, keyof S>;
+
+    const useField = <V>(key: keyof S): V => {
+        const sv = selectedState.service as IService<S>;
+
+        if (typeof sv.__state[key] === "undefined") throw new StateNotFoundException(ServiceClass.name, key.toString());
 
         return useSyncExternalStore<V>(
-            (cb) => service.subscribeToKey(key, cb),
-            () => service.state[key],
-            () => service.state[key],
+            (cb) => service.__subscribeToKey(key, cb),
+            () => service.__state[key],
+            () => service.__state[key],
         );
     }
 
-    if (!keys || (!Array.isArray(keys) && typeof keys !== "string")) return [service, useField];
+    if (!keys || (!Array.isArray(keys) && typeof keys !== "string")) return [service as C, useField];
 
     if (keys === "*") {
         for (const key of stateKeys) {

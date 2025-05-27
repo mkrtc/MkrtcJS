@@ -1,16 +1,15 @@
-import type { AbstractService } from "@/common";
 
-interface Service<T extends AbstractService> {
-    service: T;
+interface Service<C> {
+    service: C;
 }
 
 
-type SelectedState<T extends AbstractService<object>, K extends keyof T['state']> = {
-    [P in K]: T['state'][P];
+type SelectedState<S, K extends keyof S> = {
+    [P in K]: S[P]
 };
 
-type FullSelectedState<T extends AbstractService<object>> = {
-    [K in keyof T['state']]: T["state"][K];
+type FullSelectedState<S> = {
+    [K in keyof S]: S[K];
 };
 
 interface UseServiceOpts {
@@ -19,6 +18,6 @@ interface UseServiceOpts {
 }
 
 export type UseServiceOptions = UseServiceOpts;
-export type UseField<T extends AbstractService> = <V>(key: keyof T['state']) => V;
-export type KUseServiceSpecific<T extends AbstractService, K extends keyof T['state']> = Service<T> & SelectedState<T, K>;
-export type KUseServiceAll<T extends AbstractService> = Service<T> & FullSelectedState<T>;
+export type UseField<S> = <V>(key: keyof S) => V;
+export type KUseServiceSpecific<C, S, K extends keyof S> = Service<C> & SelectedState<S, K>;
+export type KUseServiceAll<C, S> = Service<C> & FullSelectedState<S>;

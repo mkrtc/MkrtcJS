@@ -1,21 +1,22 @@
+import { IsNotServiceException, StateNotFoundException } from "exceptions";
+import { IService } from "../service";
 import type { IUseState, Mapper, Updater, UseStateOptions } from "./types";
-import { AbstractService } from "@/common";
 
-const methodApply = <S extends object, I extends AbstractService = AbstractService<object>, A extends any[] = []>(mapper: Mapper<S, I, A>): MethodDecorator =>
+const methodApply = <S extends object, I, A extends any[] = []>(mapper: Mapper<S, I, A>): MethodDecorator =>
     (target, propertyKey, descriptor: PropertyDescriptor) => {
         const method = descriptor.value;
         if (typeof method !== "function") throw new Error(`${target.constructor.name}#${propertyKey.toString()} is not method`);
         descriptor.value = async function (...args: unknown[]) {
-            if (!(this instanceof AbstractService)) {
-                throw new Error(`${target.constructor.name} is not instance AbstractService or ${target.constructor.name} not have state property`)
-            }
-
+            const service = this as IService<S>;
+            if(!service.__isService) throw new IsNotServiceException(`[UseState] ${target.constructor.name}`);
+             
             const update = mapper(this as I, args as A);
 
             try {
                 if (update.use === "before") {
-                    if (!(update.key in this['state'])) throw new Error(`[UseState] ${update.key.toString()} not found in state`);
-                    this['setState'](update.key, update.value);
+                    if (!(update.key in service.__state)) throw new StateNotFoundException(`[UseState] ${target.constructor.name}`, update.key.toString());
+
+                    service.__setState(update.key.toString(), update.value);
 
                     if (update.log) console.log(`[UseState] ${update.key.toString()} = ${update.value?.toString()}`);
                 }
@@ -23,11 +24,11 @@ const methodApply = <S extends object, I extends AbstractService = AbstractServi
                 const result = await method.apply(this, args);
 
 
-                if (!(update.key in this["state"])) throw new Error(`[UseState] ${update.key.toString()} not found in state`);
+                if (!(update.key in service.__state)) throw new StateNotFoundException(`[UseState] ${target.constructor.name}`, update.key.toString());
 
                 if (update.use !== "before") {
                     const value = update.useReturnValue ? result : update?.value;
-                    this['setState'](update.key, value);
+                    service.__setState(update.key.toString(), value);
                     if (update.log) console.log(`[UseState] ${update.key.toString()} = ${value.toString()}`);
                 }
 
@@ -48,70 +49,70 @@ const methodApply = <S extends object, I extends AbstractService = AbstractServi
     }
 
 export const UseState: IUseState = {
-    return<S extends object, I extends AbstractService = AbstractService, A extends any[] = []>(key: keyof S, options?: UseStateOptions<I, A>): MethodDecorator {
+    return<S extends object, I, A extends any[] = []>(key: keyof S, options?: UseStateOptions<I, A>): MethodDecorator {
         return methodApply<S, I, A>(() => ({ ...options, key, useReturnValue: true }))
     },
-    before<S extends object, I extends AbstractService, A extends any[], K extends keyof S>(
+    before<S extends object, I, A extends any[], K extends keyof S>(
         key: keyof S, updater: Updater<S[K], I, A>, options?: UseStateOptions<I, A>
     ): MethodDecorator {
         return methodApply<S, I, A>((instance, args) => ({
             ...options,
             key,
-            value: updater(instance["state"][key as keyof object] as S[K], args, instance),
+            value: updater(instance["__state" as keyof I][key as keyof object] as S[K], args, instance),
             use: "before"
         }))
     },
-    after<S extends object, I extends AbstractService, A extends any[], K extends keyof S>(
+    after<S extends object, I, A extends any[], K extends keyof S>(
         key: keyof S, updater: Updater<S[K], I, A>, options?: UseStateOptions<I, A>
     ): MethodDecorator {
         return methodApply<S, I, A>((instance, args) => ({
             ...options,
             key,
-            value: updater(instance["state"][key as keyof object] as S[K], args, instance),
+            value: updater(instance["__state" as keyof I][key as keyof object] as S[K], args, instance),
             use: "after"
         }))
     },
 
-    increment<S extends object, I extends AbstractService, A extends any[]>(
+    increment<S extends object, I, A extends any[]>(
         key: keyof S, options?: UseStateOptions<I, A>
     ): MethodDecorator {
         return this.before<S, I, A>(key, (_, __, instance) => {
-            const value = instance["state"][key as keyof object];
+            const value = instance["__state" as keyof I][key as keyof object];
             if (typeof value !== "number") throw new Error(`[UseState] ${key.toString()} is not number`);
 
             return value + 1 as S[keyof S];
         }, options);
     },
 
-    decrement<S extends object, I extends AbstractService, A extends any[], K extends keyof S>(
+    decrement<S extends object, I, A extends any[], K extends keyof S>(
         key: keyof S, options?: UseStateOptions<I, A>
     ): MethodDecorator {
         return this.before<S, I, A>(key, (_, __, instance) => {
-            const value = instance["state"][key as keyof object];
+            const value = instance["__state" as keyof I][key as keyof object];
             if (typeof value !== "number") throw new Error(`[UseState] ${key.toString()} is not number`);
 
             return value - 1 as S[keyof S];
         }, options);
     },
 
-    toggle<S extends object, I extends AbstractService, A extends any[], K extends keyof S>(
+    toggle<S extends object, I, A extends any[], K extends keyof S>(
         key: keyof S, options?: UseStateOptions<I, A>
     ): MethodDecorator {
         return this.before<S, I, A>(key, (_, __, instance) => {
-            const value = instance["state"][key as keyof object];
+            const value = instance["__state" as keyof I][key as keyof object];
             if (typeof value !== "boolean") throw new Error(`[UseState] ${key.toString()} is not boolean`);
 
             return !value as S[keyof S];
         }, options);
     },
 
-    patch<S extends object, I extends AbstractService, K extends keyof S>(key: K, options?: UseStateOptions<I>) {
+    patch<S extends object, I, K extends keyof S>(key: K, options?: UseStateOptions<I>) {
         return {
             after<A extends any[]>(updater: Updater<S[K], I, A>) {
                 return methodApply<S, I, A>((instance, args) => ({
                     ...options,
                     key,
-                    value: updater(instance["state"][key as keyof object] as S[K], args, instance),
+                    value: updater(instance["__state" as keyof I][key as keyof object] as S[K], args, instance),
                     use: "after"
                 }))
             },
@@ -120,14 +121,14 @@ export const UseState: IUseState = {
                 return methodApply<S, I, A>((instance, args) => ({
                     ...options,
                     key,
-                    value: updater(instance["state"][key as keyof object] as S[K], args, instance),
+                    value: updater(instance["__state" as keyof I][key as keyof object] as S[K], args, instance),
                     use: "before"
                 }))
             },
 
             increment() {
                 return methodApply<S, I>(instance => {
-                    const value = instance["state"][key as keyof object];
+                    const value = instance["__state" as keyof I][key as keyof object];
                     if (typeof value !== "number") throw new Error(`[UseState] ${key.toString()} is not number`);
 
                     return {
@@ -140,7 +141,7 @@ export const UseState: IUseState = {
             },
             decrement() {
                 return methodApply<S, I>(instance => {
-                    const value = instance["state"][key as keyof object];
+                    const value = instance["__state" as keyof I][key as keyof object];
                     if (typeof value !== "number") throw new Error(`[UseState] ${key.toString()} is not number`);
 
                     return {
@@ -153,7 +154,7 @@ export const UseState: IUseState = {
             },
             toggle() {
                 return methodApply<S, I>(instance => {
-                    const value = instance["state"][key as keyof object];
+                    const value = instance["__state" as keyof I][key as keyof object];
                     if (typeof value !== "boolean") throw new Error(`[UseState] ${key.toString()} is not boolean`);
 
                     return {

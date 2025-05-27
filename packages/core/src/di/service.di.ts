@@ -1,3 +1,3 @@
-import type { AbstractService } from "@/common";
+import { IService } from "@/decorators";
 
-export const ServiceDiContainer = new Map<string, AbstractService>();
+export const ServiceDiContainer = new Map<string, IService>();

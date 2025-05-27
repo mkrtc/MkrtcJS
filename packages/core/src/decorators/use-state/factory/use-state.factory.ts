@@ -1,11 +1,10 @@
-import type { AbstractService } from "@/common";
 import type { IUseStateFactory, Updater, UseStateOptions } from "../types";
 
 import { UseState } from "../use-state.decorator";
 
 
 export const UseStateFactory = {
-    create: <S extends object, I extends AbstractService>(): IUseStateFactory<S, I> => ({
+    create: <I, S extends object>(): IUseStateFactory<S, I> => ({
         after: <A extends any[], K extends keyof S>(key: K, updater: Updater<S[K], I, A>, options?: UseStateOptions<I, A>) => UseState.after<S, I, A, K>(key, updater, options),
         before: <A extends any[], K extends keyof S>(key: K, updater: Updater<S[K], I, A>, options?: UseStateOptions<I, A>) => UseState.before<S, I, A, K>(key, updater, options),
         return: <A extends any[]>(key: keyof S, options?: UseStateOptions<I, A>) => UseState.return<S, I, A>(key, options),

@@ -1,19 +1,22 @@
 import { ServiceDiContainer } from "@/di";
-import type { AbstractService } from "@/common";
 import type { UseServiceOptions } from "@/types";
+import { IService } from "@/decorators";
+import { IsNotServiceException } from "exceptions";
 
-export const initService = <T extends AbstractService, K extends keyof T['state']>(ServiceClass: new (...args: any[]) => T, options?: UseServiceOptions): [T, string] => {
+export const initService = <C, S extends Record<string, any>>(ServiceClass: new (...args: any[]) => C, options?: UseServiceOptions): [IService<S>, string] => {
     let key: string = ServiceClass.name;
     if (options) {
         if (options.scope) {
             let key = `${ServiceClass.name}#${options.scope}`;;
             if (ServiceDiContainer.has(key)) {
-                const inst = ServiceDiContainer.get(key) as T;
+                const inst = ServiceDiContainer.get(key) as IService<S>;
                 return [inst, key];
             }
-            const inst = new ServiceClass();
+            const inst = new ServiceClass() as IService<S>;
+            if(!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
+
             if (typeof options.isGlobal !== "undefined") {
-                (inst as any).__isGlobal = options.isGlobal;
+                inst.__isGlobal = options.isGlobal;
             }
             ServiceDiContainer.set(key, inst);
             return [inst, key];
@@ -21,13 +24,14 @@ export const initService = <T extends AbstractService, K extends keyof T['state'
         }
     }
 
-    let inst = ServiceDiContainer.get(key) as T;
+    let inst = ServiceDiContainer.get(key) as IService<S>;
     if (!inst) {
-        inst = new ServiceClass();
+        inst = new ServiceClass() as IService<S>;
+        if(!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
         ServiceDiContainer.set(key, inst);
     }
     if (options && typeof options.isGlobal !== "undefined") {
-        (inst as any).__isGlobal = options.isGlobal;
+        inst.__isGlobal = options.isGlobal;
     }
     return [inst, key];
 };
