@@ -10,6 +10,7 @@ export class ClientDIContainer{
     public static serviceRefCount = new Map<string, number>();
     public static serviceOwners = new Map<string, Set<string>>();
     public static cookies: RequestCookie[] = [];
+    public static fromServerMetadata: Map<string, any> = new Map<string, any>();
 
     public static set<K extends keyof typeof ClientDIContainer>(key: K, value: typeof ClientDIContainer[K]){
         this[key] = value;

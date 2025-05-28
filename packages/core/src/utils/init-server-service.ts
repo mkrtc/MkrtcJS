@@ -3,7 +3,7 @@ import type { ServerDIContainer } from "@/di";
 import { IsNotServiceException } from "exceptions";
 import { IService } from "server";
 
-export const initServerService = <C>(container: typeof ServerDIContainer, ServiceClass: new (...args: any[]) => C, options?: UseServiceOptions): [IService, string] => {
+export const initServerService = async <C>(container: typeof ServerDIContainer, ServiceClass: new (...args: any[]) => C, options?: UseServiceOptions): Promise<[IService, string]> => {
     let key: string = ServiceClass.name;
     const serviceDiContainer = container.get("services");
     if (options) {
@@ -14,6 +14,7 @@ export const initServerService = <C>(container: typeof ServerDIContainer, Servic
                 return [inst, key];
             }
             const inst = new ServiceClass() as IService;
+            await inst.__init();
             if (!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
 
             if (typeof options.isGlobal !== "undefined") {
@@ -28,6 +29,7 @@ export const initServerService = <C>(container: typeof ServerDIContainer, Servic
     let inst = serviceDiContainer.get(key) as IService;
     if (!inst) {
         inst = new ServiceClass() as IService;
+        await inst.__init();
         if (!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
 
         serviceDiContainer.set(key, inst);

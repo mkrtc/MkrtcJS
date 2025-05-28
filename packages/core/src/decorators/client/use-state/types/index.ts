@@ -32,7 +32,7 @@ export interface IUseState {
         options?: UseStateOptions<C, A>
     ): MethodDecorator;
 
-    after<S extends object, C, A extends any[], K extends keyof S>(
+    after<S extends object, C, A extends any[], K extends keyof S = keyof S>(
         key: K,
         updater: Updater<S[K], C, A>,
         options?: UseStateOptions<C, A>
@@ -65,12 +65,12 @@ export interface IUseState {
 
 export interface IUseStateFactory<S extends object, C> {
     return: <A extends any[]>(key: keyof S, options?: UseStateOptions<C, A>) => MethodDecorator;
-    after: <A extends any[], K extends keyof S>(key: K, updater: Updater<S[K], C, A>, options?: UseStateOptions<C, A>) => MethodDecorator;
-    before: <A extends any[], K extends keyof S>(key: K, updater: Updater<S[K], C, A>, options?: UseStateOptions<C, A>) => MethodDecorator;
+    after: <A extends any[], K extends keyof S = keyof S>(key: K, updater: Updater<S[K], C, A>, options?: UseStateOptions<C, A>) => MethodDecorator;
+    before: <A extends any[], K extends keyof S = keyof S>(key: K, updater: Updater<S[K], C, A>, options?: UseStateOptions<C, A>) => MethodDecorator;
     increment<A extends any[]>(key: keyof S, options?: UseStateOptions<C, A>): MethodDecorator;
     decrement<A extends any[]>(key: keyof S, options?: UseStateOptions<C, A>): MethodDecorator;
     toggle<A extends any[]>(key: keyof S, options?: UseStateOptions<C, A>): MethodDecorator;
-    patch: <K extends keyof S>(key: K, options?: UseStateOptions<C>) => {
+    patch: <K extends keyof S = keyof S>(key: K, options?: UseStateOptions<C>) => {
         after: <A extends any[]>(updater: Updater<S[K], C, A>) => MethodDecorator;
         before: <A extends any[]>(updater: Updater<S[K], C, A>) => MethodDecorator;
         increment: () => MethodDecorator;

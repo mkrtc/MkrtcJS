@@ -1,10 +1,12 @@
-"use client"
-import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific } from "@/types";
-import { useLayoutEffect, useRef, useSyncExternalStore } from "react";
+import "reflect-metadata";
+import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific, DecoratorMetadata } from "@/types";
+import { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { initClientService } from "@/utils";
 import { StateNotFoundException } from "exceptions";
 import { ClientDIContainer } from "@/di";
 import { IService } from "client";
+import { ON_PATH_CHANGE_META_KEY, USE_EFFECT_META_KEY } from "@/common";
+import { usePathname } from "next/navigation";
 
 export function useService<C, S extends Record<string, any>>(
     ServiceClass: new (...args: any[]) => C,
@@ -12,7 +14,7 @@ export function useService<C, S extends Record<string, any>>(
 
 export function useService<C, S extends Record<string, any>>(
     ServiceClass: new (...args: any[]) => C,
-    options?: UseServiceOptions 
+    options?: UseServiceOptions
 ): [C, UseField<S>];
 
 
@@ -52,6 +54,7 @@ export function useService<C, S extends Record<string, any>>(
     const serviceRefCount = ClientDIContainer.get("serviceRefCount");
     const serviceOwners = ClientDIContainer.get("serviceOwners");
     const serviceDiContainer = ClientDIContainer.get("services");
+    const pathname = usePathname();
 
     if (!serviceRef.current) {
         const [service, diKey] = initClientService<C, S>(ClientDIContainer, ServiceClass, opts);
@@ -67,7 +70,7 @@ export function useService<C, S extends Record<string, any>>(
         }
     }
 
-    
+
     const diKey = diKeyRef.current!;
     const service = serviceRef.current!;
 
@@ -87,7 +90,7 @@ export function useService<C, S extends Record<string, any>>(
             if (owners.size === 0) {
                 serviceRefCount.delete(diKey);
                 serviceOwners.delete(diKey);
-                if((service as any).__isGlobal) return;
+                if ((service as any).__isGlobal) return;
                 service.__destroy();
                 serviceDiContainer.delete(diKey);
             } else {
@@ -95,6 +98,15 @@ export function useService<C, S extends Record<string, any>>(
             }
         };
     }, []);
+
+    const onPathChangeFuncs: DecoratorMetadata<Function>[] = Reflect.getMetadata(ON_PATH_CHANGE_META_KEY, ServiceClass.prototype);
+    useEffect(() => {
+        if (!onPathChangeFuncs) return;
+
+        for (const {value} of onPathChangeFuncs) {
+                value.apply(service, [pathname]);
+        }
+    }, [pathname]);
 
     const stateKeys: string[] = Object.keys(service.__state);
     const selectedState = { service } as KUseServiceSpecific<C, S, keyof S>;

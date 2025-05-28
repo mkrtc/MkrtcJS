@@ -1,1 +1,1 @@
-export * from "./MkrtcJS-root-provider.component";
+export * from "./mkrtc-root-provider.component";

@@ -6,7 +6,7 @@ const methodApply = <S extends object, I, A extends any[] = []>(mapper: Mapper<S
     (target, propertyKey, descriptor: PropertyDescriptor) => {
         const method = descriptor.value;
         if (typeof method !== "function") throw new Error(`${target.constructor.name}#${propertyKey.toString()} is not method`);
-        descriptor.value = async function (...args: unknown[]) {
+        descriptor.value = function (...args: unknown[]) {
             const service = this as IService<S>;
             if(!service.__isService) throw new IsNotServiceException(`[UseState] ${target.constructor.name}`);
              
@@ -21,13 +21,14 @@ const methodApply = <S extends object, I, A extends any[] = []>(mapper: Mapper<S
                     if (update.log) console.log(`[UseState] ${update.key.toString()} = ${update.value?.toString()}`);
                 }
 
-                const result = await method.apply(this, args);
+                const result = method.apply(this, args);
 
 
                 if (!(update.key in service.__state)) throw new StateNotFoundException(`[UseState] ${target.constructor.name}`, update.key.toString());
 
                 if (update.use !== "before") {
                     const value = update.useReturnValue ? result : update?.value;
+                    console.log(service);
                     service.__setState(update.key.toString(), value);
                     if (update.log) console.log(`[UseState] ${update.key.toString()} = ${value.toString()}`);
                 }
@@ -38,9 +39,9 @@ const methodApply = <S extends object, I, A extends any[] = []>(mapper: Mapper<S
                 const exp: Error = exception as Error;
                 const { error } = update;
                 if (error?.reThrow) throw error.callback?.(exp, this as I, args as A);
-                if (error?.return) return await error.callback?.(exp, this as I, args as A);
+                if (error?.return) return error.callback?.(exp, this as I, args as A);
 
-                await error?.callback?.(exp, this as I, args as A);
+                error?.callback?.(exp, this as I, args as A);
 
                 throw exp;
             }

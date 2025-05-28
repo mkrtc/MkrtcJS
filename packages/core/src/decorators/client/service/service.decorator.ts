@@ -12,7 +12,8 @@ export interface IService<S extends Record<string, any> = Record<string, any>> {
     __subscribeToKey<K extends keyof S>(key: K, cb: Listener): () => boolean;
     __destroy(): void;
     __setState<K extends keyof Record<string, any>>(key: K, value: Record<string, any>[K]): void;
-    __createReactiveState(state: S): S
+    __createReactiveState(state: S): S;
+    __init(): Promise<void>;
 }
 
 type Listener = () => void;
@@ -32,16 +33,19 @@ export const Service = <S extends Record<string, any> = Record<string, any>>(opt
             super(...args);
             this.__isGlobal = options?.isGlobal || false;
 
-            initState.call(this);
-            inject.call(this);
-            onInit.call(this);
-            const keys: DecoratorMetadata<IState>[] = Reflect.getMetadata(STATE_META_KEY, this);
+            const keys: DecoratorMetadata<IState>[] = Reflect.getMetadata(STATE_META_KEY, this) || [];
             const value: S = keys.reduce<any>((prev, { key, value }) => {
                 prev[key] = value.initialValue;
                 return prev;
             }, {});
 
             this.__state = this.__createReactiveState(value);
+            initState.call(this);
+            inject.call(this);
+        }
+        
+        public async __init(): Promise<void> {
+            await onInit.call(this);
         }
 
         public __subscribeToKey<K extends keyof S>(key: K, cb: Listener): () => boolean {

@@ -11,7 +11,6 @@ export const UseNavigator = (): MethodDecorator => (target, propertyKey, descrip
 
     descriptor.value = function (...args: any[]) {
         if (typeof window === "undefined") {
-            console.log(self)
             return method.apply(this, args);
         }
 

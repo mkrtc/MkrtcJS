@@ -1,14 +1,12 @@
-"use client"
 import type { UseServiceOptions } from "@/types";
 import type { ClientDIContainer } from "@/di";
 import { IsNotServiceException } from "exceptions";
-import { IsNotClientServiceException } from "exceptions/is-not-client-service.exception";
 import { IService } from "client";
 
 export const initClientService = <C, S extends Record<string, any>>(container: typeof ClientDIContainer, ServiceClass: new (...args: any[]) => C, options?: UseServiceOptions): [IService<S>, string] => {
     let key: string = ServiceClass.name;
     const serviceDiContainer = container.get("services");
-    console.log(serviceDiContainer);
+
     if (options) {
         if (options.scope) {
             let key = `${ServiceClass.name}#${options.scope}`;;
@@ -17,6 +15,7 @@ export const initClientService = <C, S extends Record<string, any>>(container: t
                 return [inst, key];
             }
             const inst = new ServiceClass() as IService<S>;
+            inst.__init();
             if(!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
 
             if (typeof options.isGlobal !== "undefined") {
@@ -31,6 +30,7 @@ export const initClientService = <C, S extends Record<string, any>>(container: t
     let inst = serviceDiContainer.get(key) as IService<S>;
     if (!inst) {
         inst = new ServiceClass() as IService<S>;
+        inst.__init();
         if(!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
         
         serviceDiContainer.set(key, inst);

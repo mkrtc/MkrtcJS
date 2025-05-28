@@ -1,13 +1,17 @@
 "use server"
-import { IService } from "@/decorators/server";
-import { NextCookies, NextHeaders } from "@/types";
-import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
-import { cookies, headers } from "next/headers";
+import type { IService } from "@/decorators/server";
+import type { MkrtcRequest, NextCookies, NextHeaders } from "@/types";
+
+
 
 export class ServerDIContainer{
     public static cookies: NextCookies;
     public static services: Map<string, IService> = new Map<string, IService>();
     public static headers: NextHeaders;
+    public static toClientMetadata: Map<string, any> = new Map<string, any>();
+    public static hasClientMetadataServices: Map<string, IService> = new Map<string, IService>();
+    public static clientMetadataServices: Map<string, new (...args: any[]) => IService> = new Map<string, new (...args: any[]) => IService>();
+    public static request: MkrtcRequest | null = null;
 
     public static set<K extends keyof typeof ServerDIContainer>(key: K, value: typeof ServerDIContainer[K]){
         this[key] = value;

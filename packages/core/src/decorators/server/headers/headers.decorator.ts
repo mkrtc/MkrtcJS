@@ -1,5 +1,4 @@
 import { ServerDIContainer } from "@/di";
-import { NextHeaders } from "@/types";
 import { headers } from "next/headers";
 
 /**
@@ -129,18 +128,6 @@ export const CacheControl = (): PropertyDecorator => Headers("cache-control");
  * }
  */
 export const Connection = (): PropertyDecorator => Headers("connection");
-
-/**
- * @example
- * import { Host, Service } from "@mkrtcjs/core/server";
- * 
- * *@Service()
- * class MyService{
- *  *@Host()
- *  public host: Promise<string | null>;
- * }
- */
-export const Host = (): PropertyDecorator => Headers("host");
 
 /**
  * @example
