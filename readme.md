@@ -540,7 +540,7 @@ interface StateOptions{
     timerOptions?: StateTimerOptions
 }
 ```
-- `isTimer?: boolean` - если `true`, то [[Примеры#Клиентские декораторы#@State()|@State()]] будет иметь тип [[#ITimer]].
+- `isTimer?: boolean` - если `true`, то [@State()](#state) будет иметь тип [ITimer](#itimer).
 - `timerOptions?:` **[StateTimerOptions](#StateTimerOptions)** - Настройки таймера. Будет работать только если `isTimer = true`.
 
 ### StateTimerOptions 
