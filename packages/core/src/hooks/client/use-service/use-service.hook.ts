@@ -1,3 +1,4 @@
+"use client"
 import "reflect-metadata";
 import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific, DecoratorMetadata } from "@/types";
 import { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from "react";
@@ -7,6 +8,7 @@ import { ClientDIContainer } from "@/di";
 import { IService } from "client";
 import { ON_PATH_CHANGE_META_KEY, USE_EFFECT_META_KEY } from "@/common";
 import { usePathname } from "next/navigation";
+import { v4 } from "uuid";
 
 export function useService<C, S extends Record<string, any>>(
     ServiceClass: new (...args: any[]) => C,
@@ -47,7 +49,7 @@ export function useService<C, S extends Record<string, any>>(
     keys?: Array<keyof S> | "*" | UseServiceOptions,
     options?: UseServiceOptions
 ): KUseServiceSpecific<C, S, keyof S> | KUseServiceAll<C, S> | [C, UseField<S>] {
-    const instanceId = useRef(crypto.randomUUID()).current;
+    const instanceId = useRef(v4()).current;
     const serviceRef = useRef<IService<S>>(null);
     const diKeyRef = useRef<string>(null);
     const opts = (Array.isArray(keys) || typeof keys === "string") ? options : keys;
@@ -107,6 +109,10 @@ export function useService<C, S extends Record<string, any>>(
                 value.apply(service, [pathname]);
         }
     }, [pathname]);
+
+    useEffect(() => {
+        service.__init();
+    }, [service])
 
     const stateKeys: string[] = Object.keys(service.__state);
     const selectedState = { service } as KUseServiceSpecific<C, S, keyof S>;

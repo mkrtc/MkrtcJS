@@ -15,7 +15,6 @@ export const initClientService = <C, S extends Record<string, any>>(container: t
                 return [inst, key];
             }
             const inst = new ServiceClass() as IService<S>;
-            inst.__init();
             if(!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
 
             if (typeof options.isGlobal !== "undefined") {
@@ -30,7 +29,6 @@ export const initClientService = <C, S extends Record<string, any>>(container: t
     let inst = serviceDiContainer.get(key) as IService<S>;
     if (!inst) {
         inst = new ServiceClass() as IService<S>;
-        inst.__init();
         if(!inst.__isService) throw new IsNotServiceException(ServiceClass.name);
         
         serviceDiContainer.set(key, inst);

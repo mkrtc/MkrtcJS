@@ -22,7 +22,7 @@ export const Req = (key?: keyof MkrtcRequest | (keyof MkrtcRequest)[]): Property
         const _headers = await headers();
         const _cookies = await cookies();
 
-        const referer = _headers.get("referer");
+        const referer = _headers.get("x-next-url");
         const url: URL | null = referer ? new URL(referer) : null;
         const _req = {
             headers: _headers,
@@ -34,7 +34,7 @@ export const Req = (key?: keyof MkrtcRequest | (keyof MkrtcRequest)[]): Property
             path: url?.pathname || null,
             queryParams: url?.searchParams || null,
         }
-
+        console.log(url)
         if (Array.isArray(key)) {
             return key.reduce<Record<string, any>>((acc, curr) => {
                 if (!_req) return acc;

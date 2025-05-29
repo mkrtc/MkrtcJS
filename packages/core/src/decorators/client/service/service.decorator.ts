@@ -9,6 +9,8 @@ export interface IService<S extends Record<string, any> = Record<string, any>> {
     __isService: boolean;
     __listeners: Partial<Record<keyof S, Set<Listener>>>;
     __state: S;
+    __initialized: boolean;
+    __isClient: boolean;
     __subscribeToKey<K extends keyof S>(key: K, cb: Listener): () => boolean;
     __destroy(): void;
     __setState<K extends keyof Record<string, any>>(key: K, value: Record<string, any>[K]): void;
@@ -28,6 +30,8 @@ export const Service = <S extends Record<string, any> = Record<string, any>>(opt
         public __isService: boolean = true;
         public __listeners: Partial<Record<keyof S, Set<Listener>>> = {};
         public __state: S;
+        public __initialized: boolean = false;
+        public __isClient: boolean = true;
 
         constructor(...args: any[]) {
             super(...args);
@@ -35,7 +39,7 @@ export const Service = <S extends Record<string, any> = Record<string, any>>(opt
 
             const keys: DecoratorMetadata<IState>[] = Reflect.getMetadata(STATE_META_KEY, this) || [];
             const value: S = keys.reduce<any>((prev, { key, value }) => {
-                prev[key] = value.initialValue;
+                prev[key] = this[key as keyof IService] || value.initialValue;
                 return prev;
             }, {});
 
@@ -45,7 +49,10 @@ export const Service = <S extends Record<string, any> = Record<string, any>>(opt
         }
         
         public async __init(): Promise<void> {
+            if(this.__initialized) return;
+            
             await onInit.call(this);
+            this.__initialized = true;
         }
 
         public __subscribeToKey<K extends keyof S>(key: K, cb: Listener): () => boolean {

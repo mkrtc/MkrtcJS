@@ -2,8 +2,7 @@
 import "reflect-metadata";
 import { inject, onInit } from "@/utils";
 import { ServerDIContainer } from "@/di";
-import { ON_INIT_META_KEY } from "@/common";
-import { DecoratorMetadata } from "@/types";
+
 export interface IService {
     __isService: boolean;
     __isGlobal: boolean;

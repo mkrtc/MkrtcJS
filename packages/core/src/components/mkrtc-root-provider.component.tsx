@@ -15,7 +15,6 @@ export const MkrtcRootProvider: FC<MkrtcRootProviderProps> = async ({ children }
     const cookie = await cookies();
     const toClientMetadata = ServerDIContainer.get("clientMetadataServices");
     let metadata: Record<string, any> = {};
-
     for(const [key, service] of toClientMetadata){
         const metaKeys: DecoratorMetadata<string>[] = Reflect.getMetadata(TO_CLIENT_META_KEY, service.prototype) ?? [];
         if(!metaKeys.length) continue;

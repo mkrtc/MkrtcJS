@@ -1,3 +1,4 @@
+"use server"
 import type { UseServiceOptions } from "@/types";
 import type { ServerDIContainer } from "@/di";
 import { IsNotServiceException } from "exceptions";
@@ -22,7 +23,6 @@ export const initServerService = async <C>(container: typeof ServerDIContainer, 
             }
             serviceDiContainer.set(key, inst);
             return [inst, key];
-
         }
     }
 

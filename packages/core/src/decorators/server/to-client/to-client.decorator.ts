@@ -1,6 +1,5 @@
 "use server"
 import "reflect-metadata";
-import { ServerDIContainer } from "@/di";
 import { TO_CLIENT_META_KEY } from "@/common";
 import { DecoratorMetadata } from "@/types";
 

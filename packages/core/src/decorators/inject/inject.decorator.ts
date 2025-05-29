@@ -11,7 +11,6 @@ export function Inject(): PropertyDecorator {
         if (!injectableDiContainer.has(type)) {
             injectableDiContainer.set(type, new type());
         }
-
         const injects: DecoratorMetadata[] = Reflect.getMetadata(INJECT_META_KEY, target) ?? [];
         injects.push({ key: String(propertyKey), value: injectableDiContainer.get(type) });
         Reflect.defineMetadata(INJECT_META_KEY, injects, target);
