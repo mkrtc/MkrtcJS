@@ -48,7 +48,7 @@
 
 # Установка
 ```bash
-npm i @mkrtcjs/core
+npm i mkrtcjs-core
 ```
 
 # Подключение
