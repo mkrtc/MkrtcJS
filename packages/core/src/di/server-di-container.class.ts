@@ -1,6 +1,6 @@
 "use server"
-import type { IService } from "@/decorators/server";
-import type { MkrtcRequest, NextCookies, NextHeaders } from "@/types";
+import type { IService } from "@/decorators/server/index.js";
+import type { MkrtcRequest, NextCookies, NextHeaders } from "@/types/index.js";
 
 
 

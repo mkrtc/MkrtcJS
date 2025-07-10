@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import type { DecoratorMetadata } from "@/types";
-import type { IService } from "@/decorators/client";
+import type { DecoratorMetadata } from "@/types/index.js";
+import type { IService } from "@/decorators/client/index.js";
 
-import { STATE_META_KEY } from "@/common";
+import { STATE_META_KEY } from "@/common/index.js";
 
 export function initState(this: any) {
     const states: DecoratorMetadata[] = Reflect.getMetadata(STATE_META_KEY, this) ?? [];

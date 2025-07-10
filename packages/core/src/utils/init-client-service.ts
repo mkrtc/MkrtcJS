@@ -1,7 +1,7 @@
-import type { UseServiceOptions } from "@/types";
-import type { ClientDIContainer } from "@/di";
-import { IsNotServiceException } from "exceptions";
-import { IService } from "client";
+import type { UseServiceOptions } from "@/types/index.js";
+import type { ClientDIContainer } from "@/di/index.js";
+import { IsNotServiceException } from "@/exceptions/index.js";
+import { IService } from "src/client/index.js";
 
 export const initClientService = <C, S extends Record<string, any>>(container: typeof ClientDIContainer, ServiceClass: new (...args: any[]) => C, options?: UseServiceOptions): [IService<S>, string] => {
     let key: string = ServiceClass.name;

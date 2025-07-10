@@ -1,2 +1,2 @@
-export * from "../decorators/server"
-export * from "../hooks/server";
+export * from "../decorators/server/index.js"
+export * from "../hooks/server/index.js";

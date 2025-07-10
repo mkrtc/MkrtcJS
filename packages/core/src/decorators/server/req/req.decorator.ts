@@ -1,6 +1,5 @@
-import { ServerDIContainer } from "@/di"
-import { MkrtcRequest, NextCookies, NextHeaders } from "@/types";
-import { cookies, headers } from "next/headers";
+import { MkrtcRequest } from "@/types/index.js";
+import { cookies, headers } from "next/headers.js";
 
 /**
  * @example

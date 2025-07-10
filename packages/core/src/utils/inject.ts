@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import type { DecoratorMetadata } from "@/types";
-import { INJECT_META_KEY } from "@/common";
+import type { DecoratorMetadata } from "@/types/index.js";
+import { INJECT_META_KEY } from "@/common/index.js";
 
 
 export function inject(this: any){

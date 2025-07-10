@@ -1,8 +1,8 @@
 "use server"
-import type { UseServiceOptions } from "@/types";
-import type { ServerDIContainer } from "@/di";
-import { IsNotServiceException } from "exceptions";
-import { IService } from "server";
+import type { UseServiceOptions } from "@/types/index.js";
+import type { ServerDIContainer } from "@/di/index.js";
+import { IsNotServiceException } from "@/exceptions/index.js";
+import { IService } from "src/server/index.js";
 
 export const initServerService = async <C>(container: typeof ServerDIContainer, ServiceClass: new (...args: any[]) => C, options?: UseServiceOptions): Promise<[IService, string]> => {
     let key: string = ServiceClass.name;

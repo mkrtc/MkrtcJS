@@ -1,7 +1,7 @@
 import "reflect-metadata"
-import type { DecoratorMetadata } from "@/types";
+import type { DecoratorMetadata } from "@/types/index.js";
 
-import { STATE_META_KEY } from "@/common";
+import { STATE_META_KEY } from "@/common/index.js";
 
 export interface StateOptions{
     isTimer?: boolean;

@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import type { DecoratorMetadata } from "@/types";
+import type { DecoratorMetadata } from "@/types/index.js";
 
-import { INJECT_META_KEY } from "@/common";
-import { ClientDIContainer } from "@/di";
+import { INJECT_META_KEY } from "@/common/index.js";
+import { ClientDIContainer } from "@/di/index.js";
 
 export function Inject(): PropertyDecorator {
     return function (target, propertyKey: string | symbol) {

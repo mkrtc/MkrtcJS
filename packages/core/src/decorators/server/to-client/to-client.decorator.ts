@@ -1,7 +1,7 @@
 "use server"
 import "reflect-metadata";
-import { TO_CLIENT_META_KEY } from "@/common";
-import { DecoratorMetadata } from "@/types";
+import { TO_CLIENT_META_KEY } from "@/common/index.js";
+import { DecoratorMetadata } from "@/types/index.js";
 
 
 export const ToClient = (key?: string): PropertyDecorator => (target, propertyKey) => {

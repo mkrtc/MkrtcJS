@@ -1,10 +1,10 @@
 {
   "name": "mkrtcjs-core",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Core package for MkrtcJS — includes dependency injection, metadata handling, and base architecture utilities.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "commonjs",
+  "type": "module",
   "files": [
     "dist"
   ],
@@ -58,6 +58,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.1.5",
-    "tsc-alias": "^1.8.16"
+    "tsc-alias": "^1.8.16",
+    "tsup": "^8.5.0"
   }
 }

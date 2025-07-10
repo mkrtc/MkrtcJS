@@ -1,12 +1,12 @@
 "use server"
 import "reflect-metadata";
 import React, { FC } from "react";
-import { ServerProvider } from "./server-provider.component";
-import { ClientProvider } from "./client-provider.component";
-import { cookies } from "next/headers";
-import { ServerDIContainer } from "@/di";
-import { TO_CLIENT_META_KEY } from "@/common";
-import { DecoratorMetadata } from "@/types";
+import { ServerProvider } from "./server-provider.component.js";
+import { ClientProvider } from "./client-provider.component.js";
+import { cookies } from "next/headers.js";
+import { ServerDIContainer } from "@/di/index.js";
+import { TO_CLIENT_META_KEY } from "@/common/index.js";
+import { DecoratorMetadata } from "@/types/index.js";
 
 interface MkrtcRootProviderProps {
     children: React.ReactNode;

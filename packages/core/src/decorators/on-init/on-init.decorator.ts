@@ -1,7 +1,7 @@
 import "reflect-metadata";
-import type { DecoratorMetadata } from "@/types";
+import type { DecoratorMetadata } from "@/types/index.js";
 
-import { ON_INIT_META_KEY } from "@/common";
+import { ON_INIT_META_KEY } from "@/common/index.js";
 
 
 export const OnInit = (): MethodDecorator => (target, propertyKey) => {

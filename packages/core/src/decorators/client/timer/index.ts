@@ -1,1 +1,1 @@
-export * from "./timer.decorator";
+export * from "./timer.decorator.js";

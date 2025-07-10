@@ -1,12 +1,4 @@
 
-
-
-interface CatchCbArgs<I, A, E extends Error> {
-    instance: I;
-    args: A;
-    exp: E;
-}
-
 type ErrorHandle<I, A, E extends Error> = (instance: I, args: A, exp: E) => any;
 
 interface CatchOptions {

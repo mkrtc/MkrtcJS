@@ -1,4 +1,4 @@
-import { DecoratorMetadata } from "@/types";
+import { DecoratorMetadata } from "@/types/index.js";
 
 
 export const createParamMetadata = (key: string, index: number, propertyKey: string | symbol | undefined, target: object) => {

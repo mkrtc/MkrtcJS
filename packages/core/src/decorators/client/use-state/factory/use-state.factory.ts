@@ -1,6 +1,6 @@
-import type { AfterUpdater, IUseStateFactory, Updater, UseStateOptions } from "../types";
+import type { AfterUpdater, IUseStateFactory, Updater, UseStateOptions } from "../types/index.js";
 
-import { UseState } from "../use-state.decorator";
+import { UseState } from "../use-state.decorator.js";
 
 
 export const UseStateFactory = {

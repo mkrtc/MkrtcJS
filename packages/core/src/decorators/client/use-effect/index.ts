@@ -1,1 +1,1 @@
-export * from "./use-effect.decorator";
+export * from "./use-effect.decorator.js";

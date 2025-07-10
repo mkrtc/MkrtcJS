@@ -1,1 +1,1 @@
-export * from "./watch.decorator";
+export * from "./watch.decorator.js";

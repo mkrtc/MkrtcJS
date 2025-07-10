@@ -1,1 +1,1 @@
-export * from "./cookies.decorator";
+export * from "./cookies.decorator.js";

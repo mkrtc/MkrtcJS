@@ -1,6 +1,6 @@
-import { ROUTER_PARAM_META_KEY } from "@/common";
-import { DecoratorMetadata } from "@/types";
-import { useRouter } from "next/navigation";
+import { ROUTER_PARAM_META_KEY } from "@/common/index.js";
+import { DecoratorMetadata } from "@/types/index.js";
+import { useRouter } from "next/navigation.js";
 import "reflect-metadata";
 
 /**

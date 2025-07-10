@@ -1,5 +1,5 @@
-import { ON_PATH_CHANGE_META_KEY } from "@/common";
-import { DecoratorMetadata } from "@/types";
+import { ON_PATH_CHANGE_META_KEY } from "@/common/index.js";
+import { DecoratorMetadata } from "@/types/index.js";
 import "reflect-metadata";
 
 export const OnPathChange = (): MethodDecorator => (target, propertyKey, descriptor: PropertyDescriptor) => {

@@ -1,1 +1,1 @@
-export * from "./headers.decorator";
+export * from "./headers.decorator.js";

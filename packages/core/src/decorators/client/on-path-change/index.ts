@@ -1,1 +1,1 @@
-export * from "./on-path-change";
+export * from "./on-path-change.js";

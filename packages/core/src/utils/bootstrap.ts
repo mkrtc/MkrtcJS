@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server.js";
 
 
 export const bootstrap = async (req: NextRequest) => {

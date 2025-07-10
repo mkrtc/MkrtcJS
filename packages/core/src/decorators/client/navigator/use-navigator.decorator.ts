@@ -1,7 +1,6 @@
-import { COOKIES_PARAM_META_KEY, PATHNAME_PARAM_META_KEY, ROUTER_PARAM_META_KEY } from "@/common";
-import { ClientDIContainer } from "@/di";
-import { DecoratorMetadata } from "@/types";
-import { getParamMetadata } from "@/utils";
+import { COOKIES_PARAM_META_KEY, PATHNAME_PARAM_META_KEY, ROUTER_PARAM_META_KEY } from "@/common/index.js";
+import { ClientDIContainer } from "@/di/index.js";
+import { getParamMetadata } from "@/utils/index.js";
 import "reflect-metadata";
 
 export const UseNavigator = (): MethodDecorator => (target, propertyKey, descriptor: PropertyDescriptor) => {

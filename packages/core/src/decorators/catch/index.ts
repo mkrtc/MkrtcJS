@@ -1,1 +1,1 @@
-export * from "./catch.decorator";
+export * from "./catch.decorator.js";

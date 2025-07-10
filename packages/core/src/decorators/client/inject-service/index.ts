@@ -1,1 +1,1 @@
-export * from "./inject-service.decorator";
+export * from "./inject-service.decorator.js";

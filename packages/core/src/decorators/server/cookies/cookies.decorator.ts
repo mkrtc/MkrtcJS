@@ -1,6 +1,6 @@
 "use server"
-import { ServerDIContainer } from "@/di"
-import { cookies } from "next/headers"
+import { ServerDIContainer } from "@/di/index.js"
+import { cookies } from "next/headers.js"
 
 /**
  * @example

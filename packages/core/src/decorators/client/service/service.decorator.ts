@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { ON_DESTROY_KEY, STATE_META_KEY, USE_EFFECT_META_KEY, WATCH_META_KEY } from "@/common"
-import { initState, inject, injectServiceToService, onInit } from "@/utils";
-import { DecoratorMetadata } from "@/types";
-import { IState } from "..";
+import { ON_DESTROY_KEY, STATE_META_KEY, USE_EFFECT_META_KEY, WATCH_META_KEY } from "@/common/index.js"
+import { initState, inject, injectServiceToService, onInit } from "@/utils/index.js";
+import { DecoratorMetadata } from "@/types/index.js";
+import { IState } from "../index.js";
 
 export interface IService<S extends Record<string, any> = Record<string, any>> {
     __isGlobal: boolean;

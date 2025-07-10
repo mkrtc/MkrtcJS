@@ -1,13 +1,13 @@
 "use client"
 import "reflect-metadata";
-import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific, DecoratorMetadata } from "@/types";
+import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific, DecoratorMetadata } from "@/types/index.js";
 import { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from "react";
-import { initClientService } from "@/utils";
-import { StateNotFoundException } from "exceptions";
-import { ClientDIContainer } from "@/di";
-import { IService } from "client";
-import { ON_PATH_CHANGE_META_KEY, USE_EFFECT_META_KEY } from "@/common";
-import { usePathname } from "next/navigation";
+import { initClientService } from "@/utils/index.js";
+import { StateNotFoundException } from "@/exceptions/index.js";
+import { ClientDIContainer } from "@/di/index.js";
+import { IService } from "src/client/index.js";
+import { ON_PATH_CHANGE_META_KEY } from "@/common/index.js";
+import { usePathname } from "next/navigation.js";
 import { v4 } from "uuid";
 
 export function useService<C, S extends Record<string, any>>(

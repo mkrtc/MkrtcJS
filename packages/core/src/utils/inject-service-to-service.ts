@@ -1,6 +1,6 @@
-import { INJECT_SERVICE_META_KEY } from "@/common";
-import { DecoratorMetadata } from "@/types";
-import type { IService } from "@/decorators/client";
+import { INJECT_SERVICE_META_KEY } from "@/common/index.js";
+import { DecoratorMetadata } from "@/types/index.js";
+import type { IService } from "@/decorators/client/index.js";
 
 export function injectServiceToService(this: any){
     const services: DecoratorMetadata[] = Reflect.getMetadata(INJECT_SERVICE_META_KEY, this) ?? [];

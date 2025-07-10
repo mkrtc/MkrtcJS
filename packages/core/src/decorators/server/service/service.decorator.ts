@@ -1,7 +1,7 @@
 "use server"
 import "reflect-metadata";
-import { inject, onInit } from "@/utils";
-import { ServerDIContainer } from "@/di";
+import { inject, onInit } from "@/utils/index.js";
+import { ServerDIContainer } from "@/di/index.js";
 
 export interface IService {
     __isService: boolean;

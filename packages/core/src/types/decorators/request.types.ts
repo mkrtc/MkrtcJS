@@ -1,4 +1,4 @@
-import type { NextCookies, NextHeaders } from "../server";
+import type { NextCookies, NextHeaders } from "../server/index.js";
 
 export interface MkrtcRequest{
     url: URL | null;

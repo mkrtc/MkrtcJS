@@ -1,6 +1,6 @@
-import { IService } from "@/decorators/client";
+import { IService } from "@/decorators/client/index.js";
 import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
-import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime.js";
 
 export class ClientDIContainer{
     public static router: AppRouterInstance | null = null;

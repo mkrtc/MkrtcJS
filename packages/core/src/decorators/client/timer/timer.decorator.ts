@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { STATE_META_KEY } from "@/common";
-import type { DecoratorMetadata, ITimer } from "@/types";
-import { IState } from "../use-state";
-import { IService } from "../service";
+import { STATE_META_KEY } from "@/common/index.js";
+import type { DecoratorMetadata, ITimer } from "@/types/index.js";
+import { IState } from "../use-state/index.js";
+import { IService } from "../service/index.js";
 
 interface TimerOptions {
     tickRate: number;

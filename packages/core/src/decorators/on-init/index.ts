@@ -1,1 +1,1 @@
-export * from "./on-init.decorator";
+export * from "./on-init.decorator.js";

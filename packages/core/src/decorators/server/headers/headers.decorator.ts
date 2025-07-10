@@ -1,5 +1,5 @@
-import { ServerDIContainer } from "@/di";
-import { headers } from "next/headers";
+import { ServerDIContainer } from "@/di/index.js";
+import { headers } from "next/headers.js";
 
 /**
  * @example

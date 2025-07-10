@@ -1,1 +1,1 @@
-export * from "./use-service.types";
+export * from "./use-service.types.js";

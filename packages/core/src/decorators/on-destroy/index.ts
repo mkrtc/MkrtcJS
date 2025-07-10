@@ -1,1 +1,1 @@
-export * from "./on-destroy.decorator";
+export * from "./on-destroy.decorator.js";

@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { DecoratorMetadata } from "@/types";
-import { USE_EFFECT_META_KEY } from "@/common";
+import { DecoratorMetadata } from "@/types/index.js";
+import { USE_EFFECT_META_KEY } from "@/common/index.js";
 
 type Key<S extends object> = keyof S;
 

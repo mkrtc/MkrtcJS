@@ -1,4 +1,4 @@
-import { inject } from "@/utils";
+import { inject } from "@/utils/index.js";
 
 export const Entity = () => <T extends { new(...args: any[]): object }>(target: T) => {
     class Entity extends target {

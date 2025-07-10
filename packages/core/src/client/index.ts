@@ -1,2 +1,2 @@
-export * from "../decorators/client";
-export * from "../hooks/client";
+export * from "../decorators/client/index.js";
+export * from "../hooks/client/index.js";

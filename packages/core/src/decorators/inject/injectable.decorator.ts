@@ -1,4 +1,4 @@
-import { ClientDIContainer } from "@/di";
+import { ClientDIContainer } from "@/di/index.js";
 
 export function Injectable(): ClassDecorator {
     return function (target: any) {

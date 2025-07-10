@@ -1,7 +1,7 @@
 "use client"
 import React, { FC, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { ClientDIContainer } from "@/di";
+import { usePathname, useRouter } from "next/navigation.js";
+import { ClientDIContainer } from "@/di/index.js";
 import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
 
