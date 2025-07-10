@@ -6,3 +6,4 @@ export * from "./navigator";
 export * from "./service";
 export * from "./from-server";
 export * from "./on-path-change";
+export * from "./inject-service";

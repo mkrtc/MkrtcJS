@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { ON_DESTROY_KEY, STATE_META_KEY, USE_EFFECT_META_KEY, WATCH_META_KEY } from "@/common"
-import { initState, inject, onInit } from "@/utils";
+import { initState, inject, injectServiceToService, onInit } from "@/utils";
 import { DecoratorMetadata } from "@/types";
 import { IState } from "..";
 
@@ -44,8 +44,10 @@ export const Service = <S extends Record<string, any> = Record<string, any>>(opt
             }, {});
 
             this.__state = this.__createReactiveState(value);
+            
             initState.call(this);
             inject.call(this);
+            injectServiceToService.call(this);
         }
         
         public async __init(): Promise<void> {
