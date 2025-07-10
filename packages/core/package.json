@@ -1,6 +1,6 @@
 {
   "name": "mkrtcjs-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core package for MkrtcJS — includes dependency injection, metadata handling, and base architecture utilities.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
