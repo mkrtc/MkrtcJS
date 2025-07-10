@@ -1,5 +1,5 @@
 {
-  "name": "@mkrtcjs/core",
+  "name": "mkrtcjs-core",
   "version": "1.0.0",
   "description": "Core package for MkrtcJS — includes dependency injection, metadata handling, and base architecture utilities.",
   "main": "dist/index.js",
