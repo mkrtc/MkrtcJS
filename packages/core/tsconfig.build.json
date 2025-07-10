@@ -6,19 +6,14 @@
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {
-            "@/common": ["src/common"],
+            "@/src/*": ["src/*"],
             "@/common/*": ["src/common/*"],
-            "@/decorators": ["src/decorators"],
             "@/decorators/*": ["src/decorators/*"],
-            "@/hooks": ["src/hooks"],
             "@/hooks/*": ["src/hooks/*"],
-            "@/di": ["dsrc/i"],
             "@/di/*": ["src/di/*"],
-            "@/types": ["src/types"],
             "@/types/*": ["src/types/*"],
-            "@/utils": ["src/utils"],
             "@/utils/*": ["src/utils/*"],
-            "@/exceptions/*": ["src/exceptions/*"],
+            "@/exceptions/*": ["src/exceptions/*"]
         }
     },
     "include": ["src"],
