@@ -1,4 +1,3 @@
-"use server"
 import type { IService } from "@/decorators/server/index.js";
 import type { MkrtcRequest, NextCookies, NextHeaders } from "@/types/index.js";
 
