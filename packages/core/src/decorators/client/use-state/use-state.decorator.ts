@@ -6,7 +6,7 @@ const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | 
     (target, propertyKey, descriptor: PropertyDescriptor) => {
         const method = descriptor.value;
         if (typeof method !== "function") throw new Error(`${target.constructor.name}#${propertyKey.toString()} is not method`);
-        descriptor.value = function (...args: unknown[]) {
+        descriptor.value = async function (...args: unknown[]) {
             const service = this as IService<S>;
             if(!service.__isService) throw new IsNotServiceException(`[UseState] ${target.constructor.name}`);
              
@@ -21,7 +21,7 @@ const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | 
                     if (update.log) console.log(`[UseState] ${update.key.toString()} = ${update.value?.toString()}`);
                 }
 
-                const result = method.apply(this, args);
+                const result = await method.apply(this, args);
                 
                 
                 if (use === "after") {
