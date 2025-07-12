@@ -17,7 +17,8 @@ export interface IState {
 
 export const State = <T>(initialValue?: T, options?: StateOptions): PropertyDecorator => (target, propertyKey) => {
     const states: DecoratorMetadata<IState>[] = Reflect.getMetadata(STATE_META_KEY, target) || [];
-    states.push({key: String(propertyKey), value: {initialValue: initialValue || null, options}});
+    const initValue = typeof initialValue === "undefined" ? null : initialValue; 
+    states.push({key: String(propertyKey), value: {initialValue: initValue, options}});
     Reflect.defineMetadata(STATE_META_KEY, states, target);
 }
 
