@@ -37,8 +37,12 @@ const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | 
                 return result;
             } catch (exception) {
                 const update = mapper(this as I, args as A);
+                if(use === "before-after"){
+                    service.__setState(update.key.toString(), false);
+                }
                 const exp: Error = exception as Error;
                 const { error } = update;
+                if(update.log) console.log(`[UseState] exited with error: ${exp.message}`);
                 if (error?.reThrow) throw error.callback?.(exp, this as I, args as A);
                 if (error?.return) return error.callback?.(exp, this as I, args as A);
 
