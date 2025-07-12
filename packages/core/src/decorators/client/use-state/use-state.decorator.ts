@@ -1,8 +1,8 @@
 import { IsNotServiceException, StateNotFoundException } from "@/exceptions/index.js";
-import type { IUseState, Mapper, Updater, UseStateOptions, AfterUpdater } from "./types/index.js";
+import type { IUseState, Mapper, Updater, UseStateOptions, AfterUpdater, UseStateOptionsMap } from "./types/index.js";
 import type { IService } from "../service/index.js";
 
-const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | "after", mapper: Mapper<S, I, A>): MethodDecorator =>
+const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | "after" | "before-after", mapper: Mapper<S, I, A>): MethodDecorator =>
     (target, propertyKey, descriptor: PropertyDescriptor) => {
         const method = descriptor.value;
         if (typeof method !== "function") throw new Error(`${target.constructor.name}#${propertyKey.toString()} is not method`);
@@ -12,22 +12,23 @@ const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | 
 
 
             try {
-                if (use === "before") {
+                if (use === "before" || use === "before-after") {
                     const update = mapper(this as I, args as A);
+
                     if (!(update.key in service.__state)) throw new StateNotFoundException(`[UseState] ${target.constructor.name}`, update.key.toString());
 
-                    service.__setState(update.key.toString(), update.value);
+                    service.__setState(update.key.toString(), Array.isArray(update.value) ? update.value[0] : update.value);
 
-                    if (update.log) console.log(`[UseState] ${update.key.toString()} = ${update.value?.toString()}`);
+                    if (update.log) console.log(`[UseState] ${update.key.toString()} = ${Array.isArray(update.value) ? update.value[0]?.toString() : update.value?.toString()}`);
                 }
 
                 const result = await method.apply(this, args);
 
 
-                if (use === "after") {
+                if (use === "after" || use === "before-after") {
                     const update = mapper(this as I, args as A, result);
                     if (!(update.key in service.__state)) throw new StateNotFoundException(`[UseState] ${target.constructor.name}`, update.key.toString());
-                    const value = update.useReturnValue ? result : update?.value;
+                    const value = update.useReturnValue ? result : Array.isArray(update.value) ? update.value[1] : update?.value;
                     service.__setState(update.key.toString(), value);
                     if (update.log) console.log(`[UseState] ${update.key.toString()} = ${value.toString()}`);
                 }
@@ -108,15 +109,11 @@ export const UseState: IUseState = {
     autoToggle<S extends object, R, I, A extends any[]>(
         key: keyof S, options?: UseStateOptions<I, A>
     ): MethodDecorator {
-        const setValue = (value: boolean, key: keyof S, instance: I) => {
-            const stateValue = instance["__state" as keyof I][key as keyof object];
-            if (typeof stateValue !== "boolean") throw new Error(`[UseState] ${key.toString()} is not boolean`);
-
-            return value as S[keyof S];
-        }
-        this.before<S, I, A>(key, (_, __, instance) => setValue(true, key, instance), options);
-
-        return this.after<S, R, I, A>(key, (_, __, ___, instance) => setValue(false, key, instance), options);
+        return methodApply<S, I, A>("before-after", () => ({
+            ...options,
+            key,
+            value: [true as S[keyof S], false as S[keyof S]]
+        }))
     },
 
     patch<S extends object, I, K extends keyof S>(key: K, options?: UseStateOptions<I>) {
@@ -174,19 +171,11 @@ export const UseState: IUseState = {
                 })
             },
             autoToggle() {
-                const setValue = (value: boolean, when: "before" | "after") => methodApply<S, I>(when, instance => {
-                    const stateValue = instance["__state" as keyof I][key as keyof object];
-                    if (typeof stateValue !== "boolean") throw new Error(`[UseState] ${key.toString()} is not boolean`);
-
-                    return {
-                        ...options,
-                        key,
-                        value: value as S[K]
-                    }
-                });
-                setValue(true, "before");
-
-                return setValue(false, "after");
+                return methodApply<S, I>("before-after", () => ({
+                    ...options,
+                    key,
+                    value: [true as S[keyof S], false as S[keyof S]]
+                }))
             },
         }
     }

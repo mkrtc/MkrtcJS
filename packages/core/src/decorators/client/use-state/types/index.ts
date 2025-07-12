@@ -11,7 +11,7 @@ export interface UseStateErrorOptions<C, A extends any[]> {
 export type UseStateOptionsMap<K extends object, C, A extends any[] = any[]> = {
     [Key in keyof K]: {
         key: Key;
-        value?: K[Key];
+        value?: K[Key] | [K[Key], K[Key]];
         useReturnValue?: boolean;
         log?: boolean;
         error?: UseStateErrorOptions<C, A>
