@@ -55,7 +55,7 @@ npm i mkrtcjs-core
 Чтобы обеспечить максимальную совместимость с серверными декораторами, советуем сразу из `middleware.ts` вернуть `bootstrap`. Это даст возможность на стороне сервера использовать `@Req()` декоратор. 
 ```ts
 // middleware.ts
-import { bootstrap } from "@mkrtcjs/core";
+import { bootstrap } from "mkrtcjs-core";
 import { NextRequest } from "next/server";
 
 
@@ -73,7 +73,7 @@ export const config = {
 Чтобы обеспечить связь между серверной и клиентской частью приложения, оберните все что внутри `<body></body>` компонентом `<MkrtcRootProvider />`.
 ```tsx
 // layout.tsx
-import { MkrtcRootProvider } from "@mkrtcjs/core";
+import { MkrtcRootProvider } from "mkrtcjs-core";
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode;}>) {
   return (
@@ -97,7 +97,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
 
 *Использование:*
 ```ts
-import { Service } from "@mkrtcjs/core/client";
+import { Service } from "mkrtcjs-core/client";
 
 @Service(options)
 export class MyService {}
@@ -111,8 +111,8 @@ export class MyService {}
 *Пример:*
 ```tsx
 // ./services/my.service.ts
-import { Service, State, UseStateFactory } from "@mkrtcjs/core/client"
-import { OnInit, Inject } from "@mkrtcjs/core";
+import { Service, State, UseStateFactory } from "mkrtcjs-core/client"
+import { OnInit, Inject } from "mkrtcjs-core";
 import { UserRepository } from "@Repositories";
 
 export interface MyServiceState{
@@ -149,7 +149,7 @@ export class MyService implements MyServiceState{
 ```tsx
 // ./my.component.tsx
 "use client"
-import { useService } extends "@mkrtcjs/core/client";
+import { useService } extends "mkrtcjs-core/client";
 import { MyService, MyServiceState } from "./services/my.service";
 
 export const MyComponent = () => {
@@ -171,7 +171,7 @@ export const MyComponent = () => {
 
 *использование:*
 ```ts
-import { State } from "@mkrtcjs/core/client";
+import { State } from "mkrtcjs-core/client";
 ```
 ```ts
 @State(initialValue, options)
@@ -217,7 +217,7 @@ public counter: number;
 
 Для начала создадим декоратор с помощью фабрики **[UseStateFactory](#UseStateFactory)**. Это позволит не каждый раз не передавать тип сервиса и стейта в @UseState.
 ```ts
-import { UseStateFactory } from "@mkrtcjs/core/client";
+import { UseStateFactory } from "mkrtcjs-core/client";
 
 const UseUserState = UseStateFactory.create<UserService, UserServiceState>();
 ```
@@ -330,7 +330,7 @@ public testBeforeAfter(arg1: number, arg2: string): UserEntity {
 
 *использование:*
 ```ts
-import { Watch } from "@mkrtcjs/core/client";
+import { Watch } from "mkrtcjs-core/client";
 @Watch(key)
 private watch(key, next, prev){}
 ```
@@ -355,7 +355,7 @@ private watch(key, next, prev){}
 
 *Использование:*
 ```ts
-import { Timer } from "@mkrtcjs/core/client";
+import { Timer } from "mkrtcjs-core/client";
 
 @Timer(key, options)
 public method(){}
@@ -368,8 +368,8 @@ public method(){}
 
 *Пример:*
 ```ts
-import { State, Timer } from "@mkrtcjs/core/client";
-import type { ITimer } from "@mkrtcjs/core/types";
+import { State, Timer } from "mkrtcjs-core/client";
+import type { ITimer } from "mkrtcjs-core/types";
 
 @State<ITimer | null>(null, {isTimer: true})
 public timer: ITimer;
@@ -385,7 +385,7 @@ public sendSmsCode(timer: Timer, ...args){}
 
 *Использование:*
 ```ts
-import { OnPathChange } from "@mkrtcjs/core/client";
+import { OnPathChange } from "mkrtcjs-core/client";
 
 @OnPathChange()
 private _onPathChange(pathname: string){}
@@ -398,7 +398,7 @@ private _onPathChange(pathname: string){}
 
 *Использование:*
 ```ts
-import { UseNavigator, Router, Pathname } from "@mkrtcjs/core/client";
+import { UseNavigator, Router, Pathname } from "mkrtcjs-core/client";
 
 @UseRouter()
 public method(@Router() router: AppRouterInstance, @Pathname() pathname: string){}
@@ -420,7 +420,7 @@ public method(@Router() router: AppRouterInstance, @Pathname() pathname: string)
 *Использование:*
 ```ts
 // ./http-client.ts
-import { Injectable } from "@mkrtcjs/core";
+import { Injectable } from "mkrtcjs-core";
 
 @Injectable()
 export class HttpClient{
@@ -437,7 +437,7 @@ export class HttpClient{
 *Использование:*
 ```ts
 // ./user.repository.ts
-import { Repository, Injectable, Inject } from "@mkrtcjs/core";
+import { Repository, Injectable, Inject } from "mkrtcjs-core";
 import { HttpClient } from "@/shared";
 import { UserEntity, IUserEntity } from "@/entities";
 
@@ -465,7 +465,7 @@ export class UserRepository{
 *Пример:*
 ```ts
 // ./user.entity.ts
-import { Entity, Inject } from "@mkrtcjs/core";
+import { Entity, Inject } from "mkrtcjs-core";
 import type { IUserEntity } from "./user.interface.ts";
 import { UserRepository } from "@/repositories"
 
@@ -492,7 +492,7 @@ export class UserEntity implements IUserEntity{
 
 *Пример:*
 ```ts
-import { OnInit } from "@mkrtcjs/core";
+import { OnInit } from "mkrtcjs-core";
 
 @OnInit()
 private async _onInit(){
@@ -512,7 +512,7 @@ private async _onInit(){
 
 *Использование:*
 ```ts
-import { Catch } from "@mkrtcjs/core";
+import { Catch } from "mkrtcjs-core";
 
 @Catch<Instance, args[], Error>(handler: CatchHandle<Instance, args[], Error>, options?: CatchOptions)
 public method(){

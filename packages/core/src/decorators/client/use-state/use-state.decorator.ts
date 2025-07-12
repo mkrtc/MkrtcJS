@@ -110,11 +110,12 @@ export const UseState: IUseState = {
         }, options);
     },
 
-    autoToggle<S extends object, R, I, A extends any[]>(
+    autoToggle<S extends object, I, A extends any[]>(
         key: keyof S, options?: UseStateOptions<I, A>
     ): MethodDecorator {
         return methodApply<S, I, A>("before-after", () => ({
             ...options,
+            useReturnValue: false,
             key,
             value: [true as S[keyof S], false as S[keyof S]]
         }))
