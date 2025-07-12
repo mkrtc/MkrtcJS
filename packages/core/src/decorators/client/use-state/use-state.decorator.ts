@@ -8,9 +8,9 @@ const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | 
         if (typeof method !== "function") throw new Error(`${target.constructor.name}#${propertyKey.toString()} is not method`);
         descriptor.value = async function (...args: unknown[]) {
             const service = this as IService<S>;
-            if(!service.__isService) throw new IsNotServiceException(`[UseState] ${target.constructor.name}`);
-             
-            
+            if (!service.__isService) throw new IsNotServiceException(`[UseState] ${target.constructor.name}`);
+
+
             try {
                 if (use === "before") {
                     const update = mapper(this as I, args as A);
@@ -22,8 +22,8 @@ const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | 
                 }
 
                 const result = await method.apply(this, args);
-                
-                
+
+
                 if (use === "after") {
                     const update = mapper(this as I, args as A, result);
                     if (!(update.key in service.__state)) throw new StateNotFoundException(`[UseState] ${target.constructor.name}`, update.key.toString());
@@ -105,6 +105,20 @@ export const UseState: IUseState = {
         }, options);
     },
 
+    autoToggle<S extends object, R, I, A extends any[]>(
+        key: keyof S, options?: UseStateOptions<I, A>
+    ): MethodDecorator {
+        const setValue = (value: boolean, key: keyof S, instance: I) => {
+            const stateValue = instance["__state" as keyof I][key as keyof object];
+            if (typeof stateValue !== "boolean") throw new Error(`[UseState] ${key.toString()} is not boolean`);
+
+            return value as S[keyof S];
+        }
+        this.before<S, I, A>(key, (_, __, instance) => setValue(true, key, instance), options);
+
+        return this.after<S, R, I, A>(key, (_, __, ___, instance) => setValue(false, key, instance), options);
+    },
+
     patch<S extends object, I, K extends keyof S>(key: K, options?: UseStateOptions<I>) {
         return {
             after<A extends any[], R = any>(updater: AfterUpdater<S[K], R, I, A>) {
@@ -158,6 +172,21 @@ export const UseState: IUseState = {
                         value: !value as S[K]
                     }
                 })
+            },
+            autoToggle() {
+                const setValue = (value: boolean, when: "before" | "after") => methodApply<S, I>(when, instance => {
+                    const stateValue = instance["__state" as keyof I][key as keyof object];
+                    if (typeof stateValue !== "boolean") throw new Error(`[UseState] ${key.toString()} is not boolean`);
+
+                    return {
+                        ...options,
+                        key,
+                        value: value as S[K]
+                    }
+                });
+                setValue(true, "before");
+
+                return setValue(false, "after");
             },
         }
     }

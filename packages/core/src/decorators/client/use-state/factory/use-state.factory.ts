@@ -11,6 +11,7 @@ export const UseStateFactory = {
         increment: <A extends any[]>(key: keyof S, options?: UseStateOptions<I, A>) => UseState.increment<S, I, A>(key, options),
         decrement: <A extends any[]>(key: keyof S, options?: UseStateOptions<I, A>) => UseState.decrement<S, I, A>(key, options),
         toggle: <A extends any[]>(key: keyof S, options?: UseStateOptions<I, A>) => UseState.toggle<S, I, A>(key, options),
-        patch: <K extends keyof S>(key: K, options?: UseStateOptions<I>) => UseState.patch(key, options)
+        autoToggle: <A extends any[]>(key: keyof S, options?: UseStateOptions<I, A>) => UseState.toggle<S, I, A>(key, options),
+        patch: <K extends keyof S>(key: K, options?: UseStateOptions<I>) => UseState.patch(key, options),
     })
 } as const;

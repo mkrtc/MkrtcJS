@@ -1,9 +1,9 @@
+import "reflect-metadata";
 import { INJECT_SERVICE_META_KEY } from "@/common/index.js";
 import { ClientDIContainer } from "@/di/index.js";
 import { DecoratorMetadata } from "@/types/index.js";
 import { IService } from "src/client/index.js";
 import { IsNotServiceException } from "@/exceptions/index.js";
-import "reflect-metadata";
 
 export interface InjectServiceOptions{
     init?: boolean;
