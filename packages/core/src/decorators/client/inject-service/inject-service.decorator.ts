@@ -12,7 +12,7 @@ export interface InjectServiceOptions{
 export const InjectService = (scope?: string | null, options?: InjectServiceOptions): PropertyDecorator => (target, propertyKey) => {
     const type = Reflect.getMetadata("design:type", target, propertyKey);
     const serviceDiContainer = ClientDIContainer.get("services");
-    const name = scope ? `${target.constructor.name}#${scope}` : target.constructor.name;
+    const name = scope ? `${type.constructor.name}#${scope}` : type.constructor.name;
 
     if(!serviceDiContainer.has(name)){
         if(!options?.init) throw new Error(`Service ${name} not inited!`);
