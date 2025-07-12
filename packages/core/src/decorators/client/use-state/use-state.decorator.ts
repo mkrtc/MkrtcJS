@@ -12,25 +12,25 @@ const methodApply = <S extends object, I, A extends any[] = []>(use: "before" | 
 
 
             try {
-                if (use === "before" || use === "before-after") {
+                if (use === "before-after" || use === "before") {
                     const update = mapper(this as I, args as A);
 
-                    if (!(update.key in service.__state)) throw new StateNotFoundException(`[UseState] ${target.constructor.name}`, update.key.toString());
+                    if (!(update.key in service.__state)) throw new StateNotFoundException(`[${use}] - [UseState] ${target.constructor.name}`, update.key.toString());
 
                     service.__setState(update.key.toString(), Array.isArray(update.value) ? update.value[0] : update.value);
 
-                    if (update.log) console.log(`[UseState] ${update.key.toString()} = ${Array.isArray(update.value) ? update.value[0]?.toString() : update.value?.toString()}`);
+                    if (update.log) console.log(`[${use}] - [UseState] ${update.key.toString()} = ${Array.isArray(update.value) ? update.value[0]?.toString() : update.value?.toString()}`);
                 }
 
                 const result = await method.apply(this, args);
 
 
-                if (use === "after" || use === "before-after") {
+                if (use === "before-after" || use === "after") {
                     const update = mapper(this as I, args as A, result);
-                    if (!(update.key in service.__state)) throw new StateNotFoundException(`[UseState] ${target.constructor.name}`, update.key.toString());
+                    if (!(update.key in service.__state)) throw new StateNotFoundException(`[${use}] - [UseState] ${target.constructor.name}`, update.key.toString());
                     const value = update.useReturnValue ? result : Array.isArray(update.value) ? update.value[1] : update?.value;
                     service.__setState(update.key.toString(), value);
-                    if (update.log) console.log(`[UseState] ${update.key.toString()} = ${value.toString()}`);
+                    if (update.log) console.log(`[${use}] - [UseState] ${update.key.toString()} = ${value.toString()}`);
                 }
 
 
