@@ -1,7 +1,7 @@
 {
   "name": "mkrtcjs",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A scalable React architecture framework with TypeScript, inspired by NestJS and Angular, packed as a pnpm monorepo. Provides decorators for DI, state management, and developer tooling for building maintainable frontend apps.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
