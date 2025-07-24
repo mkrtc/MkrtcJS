@@ -1,6 +1,6 @@
 {
   "name": "mkrtcjs-core",
-  "version": "1.2.7",
+  "version": "2.0.0",
   "description": "Core package for MkrtcJS — includes dependency injection, metadata handling, and base architecture utilities.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,8 +22,18 @@
     "dependency-injection",
     "decorators"
   ],
-  "author": "mkrtc",
+  "author": "mkrtc <mkrtc.sarkis@gmail.com> (https://www.npmjs.com/~mkrtc)",
   "license": "MIT",
+
+  "bugs": {
+    "url": "https://github.com/mkrtc/MkrtcJS/issues",
+    "email": "mkrtc.sarkis@gmail.com"
+  },
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mkrtc/MkrtcJS/tree/main/packages/core"    
+  },
   "publishConfig": {
     "access": "public"
   },

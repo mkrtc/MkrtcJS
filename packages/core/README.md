@@ -6,8 +6,9 @@
 - [Примеры](#примеры)
   - [Клиентские декораторы](#клиентские-декораторы)
     - [@Service()](#service)
+    - [@InjectService()](#injectservice)
     - [@State()](#state)
-    - [@UseState()](#usestate)
+    - [@UseState](#usestate)
     - [@Watch()](#watch)
     - [@UseEffect()](#useeffect)
     - [@Timer()](#timer)
@@ -20,6 +21,8 @@
     - [@Entity()](#entity)
     - [@OnInit()](#oninit)
     - [@Catch()](#catch)
+- [Хуки](#хуки)
+    - [useService()](#useservice)
 - [Типы](#типы)
     - [ServiceOptions](#serviceoptions)
     - [StateOptions](#stateoptions)
@@ -30,21 +33,23 @@
     - [AfterUpdater](#afterupdater)
     - [CatchHandle](#catchhandle)
     - [CatchOptions](#catchoptions)
+    - [InjectServiceOptions](#injectserviceoptions)
+    - [UseServiceOptions](#useserviceoptions)
 
 # Философия
 
 **MkrtcJS** - это фреймворк над фреймворком **[nextjs.](https://nextjs.org)** Проект вдохновлен такими фреймворками как **[nestjs](https://nestjs.com)** и **[angularjs](https://angularjs.org)** и так же как они использует декларативный подход в своей основе, только без излишеств.
 
 **MkrtcJS** - предлагает использовать пяти ступенчатый архитектурный подход. Где:
-* Нулевой уровень - это **Singleton** классы. *Пример: (HttpClient, CacheService, и пр.)*. На нулевом уровне обычно находятся все классы и сервисы из которых потом можно будет собрать репозитории. Классы на нулевом уровне помечаются декоратором **[@Injectable()](#injectable)** 
+* Нулевой уровень - это провайдеры. *Пример: (HttpProvider, CacheProvider, и пр.)*. Провайдеры это кассы нулевого уровня. Провайдеры своего рода каркас проекта. Провйдеры помечаются декоратором **[@Injectable()](#injectable)** что даст другим(`сервисы, сущности, репозитории`) возможность внедрят в себя провайдер.
 
-* Первый уровень - это репозитории для общения с API. Все репозитории помечаются декоратором @Repository().Репозитории могут внедрять в себя классы нулевого уровня с помощью декоратора @Inject().
+* Первый уровень - это репозитории для общения с API. Все репозитории помечаются декоратором @Repository().Репозитории могут внедрять в себя провайдеров с помощью декоратора @Inject().
 
-* Второй уровень - это сущности описывающие конкретные сущности. *Пример: (UserEntity, ProductEntity, и пр.).* Все сущности помечаются декоратором **[@Entity()](#Entity())**. Все сущности так же как и репозитории могут внедрять в себя классы нулевого уровня а так же репозитории. 
+* Второй уровень - это сущности описывающие конкретные сущности. *Пример: (UserEntity, ProductEntity, и пр.).* Все сущности помечаются декоратором **[@Entity()](#Entity())**. Все сущности так же как и репозитории могут внедрять в себя провадйеров и репозиториев. 
 
-* Третий уровень - это сервисы. Сервисы обычно создаются рядом с компонентом, и служат *"головой"* компонента. Сервисы отвечают за всю логику компонента, а так же управляют состоянием с помощью декораторов **@State()** и **@UseState**. Сервисы внутри себя могут внедрять как классы первого уровня так и репозитории.
+* Третий уровень - это сервисы. Сервисы обычно создаются рядом с компонентом, и служат *"головой"* компонента. Сервисы отвечают за всю логику компонента, а так же управляют реактивным состоянием с помощью декораторов **@State()** и **@UseState**. Сервисы внутри себя могут внедрять как провайдеров так и репозиториев.
 
-* Четвёртый уровень - это компоненты. В next-dec компоненты максимально тупые(*в хорошем смысле*) и не реализуют никакую логику. Любой компонент использует в себя hook **useService(Service)** для получения стейта с так же сервис для обработки клиентских событий(*клик, ввод и пр.*)
+* Четвёртый уровень - это компоненты. В **mkrtcjs** компоненты максимально тупые(*в хорошем смысле*) и не реализуют никакую логику. Любой компонент использует в себя hook **useService(Service)** для получения реактивного состояния а так же сервис для обработки клиентских событий(*клик, ввод и пр.*)
 
 # Установка
 ```bash
@@ -106,7 +111,7 @@ export class MyService {}
 Аргументы:
 - `options?:` **[ServiceOptions](#serviceoptions)**
 
-Декоратор **[@Service()](#service)** позволяет объявить/обновить состояние, следить за изменениями состоянии а так же внедрять репозитории и классы нулевого уровня.
+Декоратор **[@Service()](#service)** позволяет объявить/обновить реактивное состояние, следить за изменениями реактивного состоянии а так же внедрять в себя репозитории и провайдеры.
 
 *Пример:*
 ```tsx
@@ -145,6 +150,7 @@ export class MyService implements MyServiceState{
     }
 }
 ```
+
 *Использование в компоненте:*
 ```tsx
 // ./my.component.tsx
@@ -153,7 +159,7 @@ import { useService } extends "mkrtcjs-core/client";
 import { MyService, MyServiceState } from "./services/my.service";
 
 export const MyComponent = () => {
-    const {service, user, loading} = useService<MyService, MyServiceState>(MyService, ["user", "loading"]);
+    const [service, {user, loading}] = useService<MyService, MyServiceState>(MyService, ["user", "loading"]);
 
     if(loading) return <div>...loading</div>;
 
@@ -163,11 +169,47 @@ export const MyComponent = () => {
 }
 ```
 
-> ***ВАЖНО***: Обязательно импортируйте `useService` из `@mkrtcjs/core/client`. Не передавайте в `useService` конструктор класса не обернутый в декоратор **[@Service()](#service)**
+> ***ВАЖНО***: Обязательно импортируйте `useService` из `mkrtcjs-core/client`. Не передавайте в `useService` конструктор класса не обернутый в декоратор **[@Service()](#service)**
+---
+
+### @InjectService()
+Декоратор **@InjectService()** - Внедрят другой сервис в совйство сервиса.
+
+*Использование*
+```ts
+import {InjectService} from "mkrtcjs-core/client"
+
+@InjectService(scope?: string | null, options?: InjectServiceOptions)
+private readonly userService: UserService;
+```
+
+*Аргументы*
+
+ - `scope?: string | null` - Название инициализированного сервиса. Например еси в другом компоенте вы сделали `useService(MyService, [...state], {scope: "service1"})` и сейчас хотите внедрить именно этот сервис, то вам необхоимо использовать `@InjectService('service1')`
+ - `options?: InjectServiceOptions` - [InjectServiceOptions](#injectserviceoptions)
+
+*Пример*
+```ts
+// my-another.service.ts
+import {Service} from "mkrtcjs-core/client"
+
+@Service()
+export class MyAnotherService{
+    ...
+}
+// my.service.ts
+import {Service, InjectService} from "mkrtcjs-core/client"
+
+@Service()
+export class MyService{
+    @InjectService()
+    private readonly myAnotherService: MyAnotherService;
+}
+```
 ---
 
 ### @State()
-**@State()** - уведомляет сервис о том, что необходимо подписаться на обновления свойства и вызвать ре-рендер компонента, при его изменении.
+**@State()** - Говорит сервису что данное свйоство касса является реактивым состоянием, и необходимо перерисовать компанент каждый раз, когда данное свойство меняется
 
 *использование:*
 ```ts
@@ -185,7 +227,7 @@ public user: UserEntity | null;
 *Пример:*
 
 ```ts
-import { Service, State } from "@mkrtcjs/core/client";
+import { Service, State } from "mkrtcjs-core/client";
 
 interface MyServiceState{
     loading: boolean;
@@ -197,10 +239,11 @@ export class MyService implements MyServiceState{
     public loading: boolean;
 }
 ```
-### @UseState()
-Декоратор **@UseState()** - позволяет гибко управлять состоянием. Вообще @UseState сам по себе не декоратор, а обычный объект, декоратором являются его методы, которых аж 7 штук.
-
-И так по порядку, сначала создадим 3 свойство с состоянием
+### @UseState
+Декоратор **@UseState** - позволяет гибко управлять реактивным состоянием. Вообще @UseState сам по себе не декоратор, а обычный объект, декоратором являются его методы, которых аж 7 штук.
+> ***ВАЖНО:*** Любой метод, который будет обернут декоратором **@UseState** будет возвращать **Promise**.
+> 
+И так по порядку, сначала создадим 3 свойства с реактивным состоянием
 
 ```ts
 @State<UserEntity | null>(null)
@@ -213,9 +256,9 @@ public loading: boolean;
 public counter: number;
 ```
 
-И так как нам взаимодействовать с состоянием? 
+И так, как нам взаимодействовать с состоянием? 
 
-Для начала создадим декоратор с помощью фабрики **[UseStateFactory](#UseStateFactory)**. Это позволит не каждый раз не передавать тип сервиса и стейта в @UseState.
+Для начала создадим декоратор с помощью фабрики **[UseStateFactory](#UseStateFactory)**. Это позволит каждый раз не передавать тип сервиса и реактивного состояния в @UseState.
 ```ts
 import { UseStateFactory } from "mkrtcjs-core/client";
 
@@ -223,9 +266,19 @@ const UseUserState = UseStateFactory.create<UserService, UserServiceState>();
 ```
 Отличие **UseUserState** от обычного **UseState** в том, что первый уже типизирован под наш сервис.
 
-И так теперь рассмотрим какие методы нам дает **[@UseState()](#usestate)** и как с их помощь менять состояние.
-1. `@UseService.return(key)` - как уже понятно из названия, кладёт в стейт `key` возвращаемое значение метода.
+И так, теперь рассмотрим какие методы нам дает **[@UseState()](#usestate)** и как с их помощь менять реактивное состояние.
 
+1. `@UseService.return(key)` - как уже понятно из названия, кладёт в реактивное состояние `key` возвращаемое значение метода.
+    *Исполльзование*
+    ```ts
+    @UseState.return(key) // key = "hello world"
+    public myMethod(){
+        return "hello world" 
+    }
+    ```
+    *Параметры:*
+   - `key` - Название свойства куда нужно положить значение
+   
     *Пример:*
    ```ts
     @UseState.return("user")
@@ -233,9 +286,8 @@ const UseUserState = UseStateFactory.create<UserService, UserServiceState>();
         return this.userRepo.init();
     }
    ```
-   *Параметры:*
-   - key - Название ключа куда нужно положить значение
-2. `@UseState.before(key, updater)` - Меняет состояния до вызова метода.
+  
+2. `@UseState.before(key, updater)` - Меняет рекативное состояние до вызова метода.
    
    *Пример:*
    ```ts
@@ -247,7 +299,7 @@ const UseUserState = UseStateFactory.create<UserService, UserServiceState>();
    *Параметры:*
     - `key: string` - Название ключа куда нужно положить значение
     - `updater:` [Updater](#updater) - callback который должен возвращать новое значение
-4. `@UseState.after(key, afterUpdater)` - Меняет состояния после вызова метода.
+3. `@UseState.after(key, afterUpdater)` - Меняет рекативное состояние после вызова метода.
    
    *Пример:*
    ```ts
@@ -260,8 +312,8 @@ const UseUserState = UseStateFactory.create<UserService, UserServiceState>();
    *Параметры:*
     - `key: string` - Название ключа куда нужно положить значение
     - `updater:` [AfterUpdater](#afterupdater) - callback который должен возвращать новое значение
-5. Методы `@UseState.increment(key)` и `@UseState.decrement(key)` -название уже говорит само за себя: increment увеличивает значение ключа на 1, decrement наоборот уменьшает на 1. 
-     > ВАЖНО! Для того чтобы методы работали, обязательно значение состояния должен быть **Числом**, иначе выкинет ошибку
+4. Методы `@UseState.increment(key)` и `@UseState.decrement(key)` - название уже говорит само за себя: increment увеличивает значение реактивного состояния на 1, decrement наоборот уменьшает на 1. 
+     > ВАЖНО! Для того чтобы методы работали, значение реактивного состояния обязательно должен быть **Числом**, иначе выкинет ошибку
 
     *Пример:*
     ```ts
@@ -274,7 +326,7 @@ const UseUserState = UseStateFactory.create<UserService, UserServiceState>();
     ```
     *Параметры:*
     - `key: string` - Ключ свойства
-6. Методы `@UseState.toggle(key)` и `@UseState.autoToggle(key)` - переключатель boolean значений. Отличие их в том, что `.toggle()` просто переключает 1 раз, а autoToggle - до вызова устанавливает значение свойства на `true` а после `false`, удобно для всяких loader-ов.
+5. Методы `@UseState.toggle(key)` и `@UseState.autoToggle(key)` - переключатель boolean значений. Отличие их в том, что `.toggle()` просто переключает 1 раз, а autoToggle - до вызова устанавливает значение свойства на `true` а после `false`, удобно для всяких loader-ов.
     
     *Пример:*
     ```ts
@@ -292,11 +344,12 @@ const UseUserState = UseStateFactory.create<UserService, UserServiceState>();
     ```
     *Параметры:*
     - `key: string` - Ключ свойства
-7. Метод `@UseState.patch(key)` - принимает в аргументы название свойства, и возвращает все методы которые есть у обычного @UseState кроме `.patch` с тем отличием, что остальным методам больше не нужно указать `key`.
+6. Метод `@UseState.patch(key)` - принимает в аргументы название свойства, и возвращает все методы которые есть у обычного @UseState кроме `.patch` с тем отличием, что остальным методам больше не нужно указать `key`.
     
     *Пример:*
     ```ts
-    @UseState.patch("user").return()
+    @(UseState.patch("loading").autoToggle()) // Если вырражения декоратора состоят более одного метода, нужно весь декоратор обернуть скобакми
+    @UseState.return("user")
     public initUser(){
         return this.userRepo.init();
     }
@@ -313,7 +366,7 @@ public async getUser(id: number){
     return await this.userRepo.findOne(id);
 }
 
-@UseUserState.patch("counter").increment()
+@(UseUserState.patch("counter").increment())
 
 // что тут произошло? Мы с помощью дженерика указываем тип аргументов, в виде массив. В аргументы callback функции к нам падают Текущее значение, экземпляр текущего класса(сервиса) И аргументы с дженерик типом в виде массива
 @UseUserState.before<[number, string]>("loading", (currentValue, instance, [arg1, arg2]) => true)
@@ -326,11 +379,12 @@ public testBeforeAfter(arg1: number, arg2: string): UserEntity {
 ```
 
 ### @Watch()
-**@Watch()** - это декоратор, который вызывает метод, при изменении конкретного стейта.
+**@Watch()** - это декоратор, который вызывает метод, при изменении конкретного рекативного свойства.
 
 *использование:*
 ```ts
 import { Watch } from "mkrtcjs-core/client";
+
 @Watch(key)
 private watch(key, next, prev){}
 ```
@@ -343,12 +397,12 @@ private watch(key, next, prev){}
 - `next: T` - новое значение стейта
 - `prev?: T` - старое значение стейта
 
-> ***ВАЖНО:*** @Watch() будет вызвать метод всегда, даже если в стейт положили одно и то же значение.
+> ***ВАЖНО:*** @Watch() будет вызвать метод всегда, даже если в реативное состояние положили одно и то же значение.
 
-> ***ЗАМЕТКА:*** Старайтесь максимально избегать использования `@Watch("*")`. Это может повлиять на производительность, особенно если стейтов много.
+> ***ЗАМЕТКА:*** Старайтесь максимально избегать использования `@Watch("*")`. Это может повлиять на производительность, особенно если состояний много.
 
 ### @UseEffect()
-**@UseEffect** работает идентично [@Watch()](#watch) с тем отличием, что @UseEffect будет вызвать метод, только если новое значение стейта отличается от старого.
+**@UseEffect** работает идентично [@Watch()](#watch) с тем отличием, что **@UseEffect** будет вызвать метод, только если новое значение реактивного состояния отличается от старого.
 
 ### @Timer()
 Декоратор **@Timer()** как уже понятно из название создает таймер. 
@@ -364,7 +418,7 @@ public method(){}
 - `key: string;` - Название стейта
 - `options:` **[TimerOptions](#timeroptions)** - Настройки таймера 
 
-> Перед использованием @Timer() обязательно обявите стейт со значением `isTimer: true`
+> Перед использованием @Timer() обязательно обявите реактивное состояние со значением `isTimer: true`
 
 *Пример:*
 ```ts
@@ -378,10 +432,10 @@ public timer: ITimer;
 public sendSmsCode(timer: Timer, ...args){}
 ```
 
-> **ВАЖНО!!!** Не важно какое вы укажите значение по умолчанию для стейта, при использовании **`@Timer`** стейт будет переопределен на **[ITimer](#itimer)**
+> **ВАЖНО!!!** Не важно какое вы укажите значение по умолчанию для свойства, при использовании **`@Timer`** значение свойства будет переопределен на **[ITimer](#itimer)**
 
 ### @OnPathChange()
-Декоратор **@OnPathChange** - Вызывает метод каждый раз когда utl путь меняется. Метод всегда принимает 1 параметр - `pathname`;
+Декоратор **@OnPathChange** - Вызывает метод каждый раз когда url путь меняется. Метод всегда принимает 1 параметр - `pathname`;
 
 *Использование:*
 ```ts
@@ -392,7 +446,7 @@ private _onPathChange(pathname: string){}
 ```
 
 ### @UseNavigator()
-Декоратор **@UseNavigator()** дает возможность использовать в аргументах метода слежующие декораторы:
+Декоратор **@UseNavigator()** дает возможность использовать в аргументах метода следующие декораторы:
 - `@Router()` - Значение из netxjs/useRouter();
 - `@Pathname()` - Значение из nextjs/usePathname();
 
@@ -404,7 +458,7 @@ import { UseNavigator, Router, Pathname } from "mkrtcjs-core/client";
 public method(@Router() router: AppRouterInstance, @Pathname() pathname: string){}
 ```
 
-> **ВАЖНО:** Декоратор `@UseNavigator()` не будет вызвать метод при каждом изменении url пути. Учите это при разработке.
+> **ВАЖНО:** Декоратор `@UseNavigator()` не будет вызвать метод при каждом изменении url пути. Учтите это при разработке.
 
 
 ## Общие декораторы
@@ -415,7 +469,7 @@ public method(@Router() router: AppRouterInstance, @Pathname() pathname: string)
 Ограничения:
  1. Класс обернутый декоратором **@Injectable()** в конструктор может принимать только другие классы обернутые декоратором **@Injectable()** 
 Советы: 
- 1. Оберните декоратором **Injectable()** только классы нулевого и первого уровня, а так же все остальные классы, которые могут быть **Single tone**.
+ 1. Оберните декоратором **Injectable()** только провайдеры и репозитории, а так же все остальные классы, которые могут быть **Single tone**.
  
 *Использование:*
 ```ts
@@ -430,7 +484,7 @@ export class HttpClient{
 
 ### @Inject()
 
-Декоратор **@Inject()** - внедряет класс, в свойство класса. В параметры принимает конструктор класса который хочет внедрить. 
+Декоратор **@Inject()** - внедряет класс, в свойство класса.
 
 > ВАЖНО: Конструктор класса который необходимо внедрить, обязательно должен быть обернутым декоратором **[@Injectable()](#injectable)**, иначе внедрение не произойдёт.
 
@@ -444,7 +498,7 @@ import { UserEntity, IUserEntity } from "@/entities";
 @Repository()
 @Injectable()
 export class UserRepository{
-   @Inject(HttpClient)
+   @Inject()
    private readonly httpClient: HttpClient;
 
    public async findAll(): Promise<UserEntity[]>{
@@ -505,7 +559,7 @@ private async _onInit(){
 
 > **ЗАМЕТКА!!!** Рекомендуем сделать метод приватным.
 
-> **ВАЖНО!!!** Метод вызовется только при инициализации сервиса. Т.е. если вы в родительском классе внедрили сервис с помощью хука **[[#useService()]]**, а дальше в дочернем компонент тоже пытаетесь внедрить сервис, то инициализация не произойдёт, поскольку сервис уже инициализирован в родительском компоненте, а вы в дочернем компоненте вы его получите из DI контейнера.
+> **ВАЖНО!!!** Метод вызовется только при инициализации сервиса. Т.е. если вы в родительском классе внедрили сервис с помощью хука **[[#useService()]]**, а дальше в дочернем компонент тоже пытаетесь внедрить сервис, то инициализация не произойдёт, поскольку сервис уже инициализирован в родительском компоненте, а в дочернем компоненте вы его получите из DI контейнера.
 
 ### @Catch()
 Декоратор **@Catch()** автоматом оборачивает метод в try/catch.
@@ -523,6 +577,96 @@ public method(){
 - `handler:` **[CatchHandle](#catchhandle)** - callback функция, которая отработает в случае ошибки.
 - `options?:` **[CatchOptions](#catchoptions)** - Настройки
 
+# Хуки
+
+### useService()
+Хук **useService** нужен для того, чтобы внедрить сервис в компонент.
+
+*Использование*
+```ts
+import {useService} from "mkrtcjs-core/client";
+useService<ServiceClass, ServiceState>(service: ServiceClass, state: ServiceState, options?: UseServiceOptions)
+```
+
+*Аргументы*
+
+- `service: ServiceClass` - Конструктор [сервиса](#service).
+- `state: ServiceState` - Тип рекативного состояния.
+- `options?: UseServiceOptions` - [UseServiceOptions](#useserviceoptions). Настройки.
+  
+*Пример*
+```tsx
+// user.service.ts
+import { Service, State, UseStateFactory } from "mkrtcjs-core/client";
+import { Inject, OnInit } from "mkrtcjs-core";
+import { UserRepository } from "@/repositories"; 
+import { UserEntity } from "@/entities";
+
+const UseState = UseStateFactory.create<UserService, UserState>();
+
+export interface UserState{
+    loading: boolean;
+    users: UserEntity[];
+}
+
+export class UserService implements UserState{
+    @State(false)
+    public loading: boolean;
+
+    @State([])
+    public users: UserEntity[];
+
+    @Inject()
+    private readonly userRepo: UserRepository;
+
+    @OnInit()
+    private _onInit(){
+        this.findAllUsers();
+    }
+
+    @UseState.autotoggle("loading")
+    @UseState.return("users")
+    private async findAlllUsers(){
+        return await userRepo.findAll();
+    }
+
+    @UseState.autotoggle("loading")
+    public sayHello(user: UserEntity){
+        console.log(`user: ${user.name} say hello`);
+    }
+
+}
+
+// use-user-service.hook.ts
+import { UseServiceFactory } from "mkrtjs-core/client";
+import { UserService, UserState } from "./user.service";
+
+export const useUserService = UseServiceFactory.create<UserService, UserState>(UserService, {isGlobal: false, scope: "alternativeService"});
+
+// UserComponent.tsx
+import { useService } from "mkrtcjs-core/client";
+import { useUserService } from "./use-user-service.hook";  
+import { UserService, UserState } from "./user.service";
+
+export const UserComponent = () => {
+    const [service, {users, loading}] = useService<UserService, UserState>(UserService, ["loading", "users"]);
+    // or
+    const [service, {users, loading}] = useUserService(["loading", "users"]);
+
+    
+    return (
+        {loading ?
+            <div>loading...</div> :
+            <ul>
+                {users.map(user => (
+                    <li onClick={() => service.sayHello(user)} key={user.id}>{user.name}</li>
+                ))}
+            </ul>
+
+        }
+    )
+}
+```
 # Типы
 
 ### ServiceOptions
@@ -612,4 +756,24 @@ interface CatchOptions {
 ```
 - `useReturn: boolean;` - если `true`, то метод вернет callback при ошибке
 - `reThrow: boolean;` - если `true`, то выкинет ошибку наружу
+
+### InjectServiceOptions
+```ts
+interface InjectServiceOptions{
+    init?: boolean;
+}
+```
+- `init?: boolean` - Укажите `true` если не уверены, что сервис будет инициализирован до инициаллизации текущего сервиса. Тогда, перед внедреием, пройдет провека и если сервис не будет инициализирован, то произойдет его инициализация.
+
+>***ВЖНО*** - Если не указать значение `true` и при инициализации текущего касса, внедряемый сервис не будет инициализирован, то выкинется ошибка `Service [ServiceName] not inited`.
+
+### UseServiceOptions
+```ts
+interface UseServiceOptions {
+    scope?: string;
+    isGlobal?: boolean;
+}
+```
+- `scope?: string` - Название сервиса. Укажите если хотите несколько раз использовать [useService()](#useservice) и чтобы у всех было свое реактивное состояние. Если укажите, то при использовании декоратора [@InjectService](#injectservice) необходимо будет первым параметром передать `scope`.
+- `isGlobal?: boolean` - Будет ли сервис глобальным. По умолчанию: `false`.
 ---

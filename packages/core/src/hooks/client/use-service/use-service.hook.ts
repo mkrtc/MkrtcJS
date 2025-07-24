@@ -1,6 +1,6 @@
 "use client"
 import "reflect-metadata";
-import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific, DecoratorMetadata } from "@/types/index.js";
+import type { UseServiceOptions, UseField, KUseServiceAll, KUseServiceSpecific, DecoratorMetadata, ClassType } from "@/types/index.js";
 import { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { initClientService } from "@/utils/index.js";
 import { StateNotFoundException } from "@/exceptions/index.js";
@@ -10,56 +10,23 @@ import { ON_PATH_CHANGE_META_KEY } from "@/common/index.js";
 import { usePathname } from "next/navigation.js";
 import { v4 } from "uuid";
 
-export function useService<C, S extends Record<string, any>>(
-    ServiceClass: new (...args: any[]) => C,
-): [C, UseField<S>];
 
-export function useService<C, S extends Record<string, any>>(
-    ServiceClass: new (...args: any[]) => C,
+
+export function useService<C, S extends Record<string, any>, K extends keyof S = keyof S>(
+    ServiceClass: ClassType<C>,
+    state: K[],
     options?: UseServiceOptions
-): [C, UseField<S>];
-
-
-export function useService<C, S extends Record<string, any>>(
-    ServiceClass: new (...args: any[]) => C,
-    keys: Array<keyof S>
-): KUseServiceSpecific<C, S, keyof S>;
-
-export function useService<C, S extends Record<string, any>>(
-    ServiceClass: new (...args: any[]) => C,
-    keys: "*"
-): KUseServiceAll<C, S>;
-
-
-export function useService<C, S extends Record<string, any>>(
-    ServiceClass: new (...args: any[]) => C,
-    keys: Array<keyof S>,
-    options: UseServiceOptions
-): KUseServiceSpecific<C, S, keyof S>;
-
-export function useService<C, S extends Record<string, any>>(
-    ServiceClass: new (...args: any[]) => C,
-    keys: "*",
-    options: UseServiceOptions
-): KUseServiceAll<C, S>;
-
-
-export function useService<C, S extends Record<string, any>>(
-    ServiceClass: new (...args: any[]) => C,
-    keys?: Array<keyof S> | "*" | UseServiceOptions,
-    options?: UseServiceOptions
-): KUseServiceSpecific<C, S, keyof S> | KUseServiceAll<C, S> | [C, UseField<S>] {
+): [C, Record<K, S[K]>] {
     const instanceId = useRef(v4()).current;
     const serviceRef = useRef<IService<S>>(null);
     const diKeyRef = useRef<string>(null);
-    const opts = (Array.isArray(keys) || typeof keys === "string") ? options : keys;
     const serviceRefCount = ClientDIContainer.get("serviceRefCount");
     const serviceOwners = ClientDIContainer.get("serviceOwners");
     const serviceDiContainer = ClientDIContainer.get("services");
     const pathname = usePathname();
 
-    if (!serviceRef.current) {
-        const [service, diKey] = initClientService<C, S>(ClientDIContainer, ServiceClass, opts);
+    if (!serviceRef.current || !diKeyRef.current) {
+        const [service, diKey] = initClientService<C, S>(ClientDIContainer, ServiceClass, options);
         serviceRef.current = service;
         diKeyRef.current = diKey;
 
@@ -72,9 +39,8 @@ export function useService<C, S extends Record<string, any>>(
         }
     }
 
-
-    const diKey = diKeyRef.current!;
-    const service = serviceRef.current!;
+    const diKey = diKeyRef.current;
+    const service = serviceRef.current;
 
     const owners = serviceOwners.get(diKey)!;
     owners.add(instanceId);
@@ -82,7 +48,11 @@ export function useService<C, S extends Record<string, any>>(
 
     useLayoutEffect(() => {
         const diKey = diKeyRef.current!;
+        if(!serviceOwners.has(diKey)){
+            serviceOwners.set(diKey, new Set());
+        }
         const owners = serviceOwners.get(diKey)!;
+
         owners.add(instanceId);
         serviceRefCount.set(diKey, owners.size);
 
@@ -105,8 +75,8 @@ export function useService<C, S extends Record<string, any>>(
     useEffect(() => {
         if (!onPathChangeFuncs) return;
 
-        for (const {value} of onPathChangeFuncs) {
-                value.apply(service, [pathname]);
+        for (const { value } of onPathChangeFuncs) {
+            value.apply(service, [pathname]);
         }
     }, [pathname]);
 
@@ -114,11 +84,10 @@ export function useService<C, S extends Record<string, any>>(
         service.__init();
     }, [service])
 
-    const stateKeys: string[] = Object.keys(service.__state);
-    const selectedState = { service } as KUseServiceSpecific<C, S, keyof S>;
+    const selectedState = [service, {}] as [C, Record<K, S[K]>]; 
 
     const useField = <V>(key: keyof S): V => {
-        const sv = selectedState.service as IService<S>;
+        const sv = selectedState[0] as IService<S>;
         if (typeof sv.__state[key] === "undefined") throw new StateNotFoundException(ServiceClass.name, key.toString());
 
         return useSyncExternalStore<V>(
@@ -128,24 +97,9 @@ export function useService<C, S extends Record<string, any>>(
         );
     }
 
-    if (!keys || (!Array.isArray(keys) && typeof keys !== "string")) return [service as C, useField];
-
-    if (keys === "*") {
-        for (const key of stateKeys) {
-            (selectedState as any)[key] = useField(key);
-        }
-
-        return selectedState;
+    for (const key of state) {
+        selectedState[1][key] = useField(key);
     }
 
-    if (keys && Array.isArray(keys)) {
-        for (const key of keys) {
-            (selectedState as any)[key] = useField(key);
-        }
-
-        return selectedState;
-    }
-
-    throw new Error("Invalid keys");
-
+    return selectedState;
 }
