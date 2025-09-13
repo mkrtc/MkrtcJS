@@ -113,7 +113,38 @@ export class MyService {}
 
 Декоратор **[@Service()](#service)** позволяет объявить/обновить реактивное состояние, следить за изменениями реактивного состоянии а так же внедрять в себя репозитории и провайдеры.
 
-*Пример:*
+*Простой пример:*
+```ts
+import { Service } from "mkrtcjs-core";
+
+@Service()
+class MyService {
+    getData() {
+        return 'Hello, MkrtcJS!';
+    }
+}
+
+export default MyService;
+```
+
+*Использование в компоненте:*
+```tsx
+"use client"
+import { useService } from "mkrtcjs-core/client";
+import MyService from "./MyService";
+
+export const MyComponent = () => {
+    const [service] = useService(MyService, []);
+
+    return (
+        <div>
+            <p>{service.getData()}</p>
+        </div>
+    );
+}
+```
+
+*Расширенный пример:*
 ```tsx
 // ./services/my.service.ts
 import { Service, State, UseStateFactory } from "mkrtcjs-core/client"
