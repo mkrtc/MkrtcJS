@@ -102,10 +102,27 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
 
 *Использование:*
 ```ts
+// hello.service.ts
 import { Service } from "mkrtcjs-core/client";
 
-@Service(options)
-export class MyService {}
+@Service()
+export class HelloService {
+  public getMessage() {
+    return "Hello, MkrtcJS!";
+  }
+}
+
+// hello.component.tsx
+"use client";
+import { useService } from "mkrtcjs-core/client";
+import { HelloService } from "./hello.service";
+
+export const HelloComponent = () => {
+  const [service] = useService(HelloService);
+
+  return <div>{service.getMessage()}</div>;
+};
+
 ```
 
 Аргументы:
